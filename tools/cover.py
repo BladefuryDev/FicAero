@@ -13,6 +13,7 @@ CHROME = 82                 # browser tab + address bar height in the shots
 W, H = 1600, 900            # cover size (16:9)
 SLANT = 150                 # how far each cut leans, top to bottom
 GAP = 3                     # light seam between shards
+AA = 4                      # supersampling for the cuts: ImageDraw has no antialiasing
 GLOW = 12                   # width of the glow line before blurring
 GLOW_BLUR = 6               # blur radius of the glow
 GLOW_ALPHA = 200            # strength of the glow (coloured, so it can be stronger than white)
@@ -43,6 +44,19 @@ for n in names:
     im = im.resize((W, round(im.height * W / im.width)), Image.LANCZOS)
     frames.append(im.crop((0, 0, W, H)))
 
+def aa_polygon(poly):
+    """An antialiased L mask of a polygon: drawn at AA times the size and
+    scaled down."""
+    m = Image.new('L', (W * AA, H * AA), 0)
+    ImageDraw.Draw(m).polygon([(x * AA, y * AA) for x, y in poly], fill=255)
+    return m.resize((W, H), Image.LANCZOS)
+
+def aa_line(pts, width):
+    """An antialiased L mask of a line."""
+    m = Image.new('L', (W * AA, H * AA), 0)
+    ImageDraw.Draw(m).line([(x * AA, y * AA) for x, y in pts], fill=255, width=width * AA)
+    return m.resize((W, H), Image.LANCZOS)
+
 # 2. shards: parallelograms whose cuts lean right going down. The first and
 #    last run off the canvas so the edges stay square.
 n = len(frames)
@@ -56,26 +70,28 @@ for i, fr in enumerate(frames):
         poly = [(-SLANT, 0), (x1, 0), (x1 + SLANT, H), (-SLANT, H)]
     if i == n - 1:
         poly = [(x0, 0), (W + SLANT, 0), (W + SLANT, H), (x0 + SLANT, H)]
-    mask = Image.new('L', (W, H), 0)
-    ImageDraw.Draw(mask).polygon(poly, fill=255)
-    cover.paste(fr, (0, 0), mask)
+    cover.paste(fr, (0, 0), aa_polygon(poly))
 
 # 3. seams: an outer glow (a wide blurred line) under a crisp line, so the
 #    shards read even where two light pages meet. Each seam takes the accent
 #    of the shard on its left: the glow in the accent itself, the line lifted
 #    towards white so it stays visible on the dark bar.
+cover = cover.convert('RGBA')
 glow = Image.new('RGBA', (W, H), (0, 0, 0, 0))
-gd = ImageDraw.Draw(glow)
 seams = Image.new('RGBA', (W, H), (0, 0, 0, 0))
-d = ImageDraw.Draw(seams)
 for i in range(1, n):
     x = i * step - SLANT
     c = accents[i - 1]
-    gd.line([(x, 0), (x + SLANT, H)], fill=c + (GLOW_ALPHA,), width=GLOW)
-    d.line([(x, 0), (x + SLANT, H)], fill=lift(c, 0.55) + (240,), width=GAP)
+    pts = [(x, 0), (x + SLANT, H)]
+    g = Image.new('RGBA', (W, H), c + (0,))
+    g.putalpha(aa_line(pts, GLOW).point(lambda v: v * GLOW_ALPHA // 255))
+    glow = Image.alpha_composite(glow, g)
+    l = Image.new('RGBA', (W, H), lift(c, 0.55) + (0,))
+    l.putalpha(aa_line(pts, GAP).point(lambda v: v * 240 // 255))
+    seams = Image.alpha_composite(seams, l)
 print('accents', ['#%02x%02x%02x' % a for a in accents])
 glow = glow.filter(ImageFilter.GaussianBlur(GLOW_BLUR))
-cover = Image.alpha_composite(cover.convert('RGBA'), glow)
+cover = Image.alpha_composite(cover, glow)
 cover = Image.alpha_composite(cover, seams)
 
 # 4. the wordmark: the aero gradient treatment on the glass plate (chosen
