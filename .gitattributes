@@ -1,0 +1,6 @@
+# The UserCSS header parser breaks on CRLF, so every text file stays LF on
+# every checkout, whatever core.autocrlf says.
+* text=auto eol=lf
+*.user.css text eol=lf
+*.png binary
+*.jpg binary
