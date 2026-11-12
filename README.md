@@ -353,7 +353,9 @@ part of the install link and should not change once readers have installed from 
   `python tools/cover.py <shots dir> listing/cover.png <shot ...>` in display order.
   The other files in `listing/` are gallery screenshots for the listing (story page in
   Slate and Paper, a browse listing), made by `tools/shots.py` from the same kind of
-  full-window shots: chrome cropped, scaled to 1600 wide.
+  full-window shots: chrome cropped, scaled to 1600 wide. `listing/LISTING.md` holds
+  the field values for the UserStyles.world form (import from the raw URL with code
+  mirroring on; category `fanfiction.net`; description, notes, licence).
 - `tools/unwrap.js` — strips the `@-moz-document` wrapper from a compiled build so the
   CSS can be pasted into a page as a `<style>` for preview (Chromium drops
   `@-moz-document` blocks in inline styles, and the desktop app's browser pane blocks
