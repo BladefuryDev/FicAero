@@ -344,6 +344,13 @@ part of the install link and should not change once readers have installed from 
   the body maps; never use `light` or `dark` as values, they are Stylus-language colour
   functions and the comparison goes wrong silently. Select option values in the header must
   be JSON strings or the whole header fails to parse and Stylus lints the body as plain CSS.
+- `listing/cover.png` — the UserStyles.world cover (1600×900): the home page cut into
+  seven diagonal shards, one per accent colour, Slate last, each seam glowing in the
+  accent of the shard to its left, the FicAero wordmark on a glass plate bottom-left.
+  Built by `tools/cover.py` from full-window screenshots of the home page (chrome cropped
+  at 82 px; the accent is sampled from the diamond beside "FANFICTION"), with the
+  wordmark from `tools/wordmark.py` (three treatments; `aero` is the one in use).
+  `python tools/cover.py <shots dir> listing/cover.png <shot ...>` in display order.
 - `tools/unwrap.js` — strips the `@-moz-document` wrapper from a compiled build so the
   CSS can be pasted into a page as a `<style>` for preview (Chromium drops
   `@-moz-document` blocks in inline styles, and the desktop app's browser pane blocks
