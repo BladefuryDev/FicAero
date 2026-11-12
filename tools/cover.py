@@ -10,6 +10,7 @@ from PIL import Image, ImageDraw, ImageFilter
 
 shots_dir, out, *names = sys.argv[1:]
 CHROME = 82                 # browser tab + address bar height in the shots
+SCROLLBAR = 18              # the window's scrollbar at the right edge of the shots
 W, H = 1600, 900            # cover size (16:9)
 SLANT = 150                 # how far each cut leans, top to bottom
 GAP = 3                     # light seam between shards
@@ -40,7 +41,7 @@ frames, accents = [], []
 for n in names:
     im = Image.open(f'{shots_dir}/{n}').convert('RGB')
     accents.append(accent_of(im))
-    im = im.crop((0, CHROME, im.width, im.height))
+    im = im.crop((0, CHROME, im.width - SCROLLBAR, im.height))
     im = im.resize((W, round(im.height * W / im.width)), Image.LANCZOS)
     frames.append(im.crop((0, 0, W, H)))
 
