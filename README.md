@@ -12,7 +12,7 @@ theme works by stable ids and classes and should survive routine site updates.
 
 1. Install the Stylus extension (Firefox or Chromium).
 2. Open the raw file in the browser:
-   `https://raw.githubusercontent.com/BladefuryDev/ficaero/main/ficaero.user.css`
+   `https://raw.githubusercontent.com/BladefuryDev/FicAero/main/ficaero.user.css`
    (or drag a local copy onto a tab). Stylus recognises the `.user.css` name and offers
    to install it. Stylus then checks the header's `@updateURL` (the same raw file) and
    offers each new `@version`, so bumping the version and pushing is how fixes reach
@@ -328,7 +328,7 @@ setting", so the site's buttons keep working otherwise.
 ## Repository layout
 
 The folder is its own git repository (initialised 2026-11-12), meant to live at
-`github.com/BladefuryDev/ficaero` on `main`; the header's `@updateURL`,
+`github.com/BladefuryDev/FicAero` on `main`; the header's `@updateURL`,
 `@homepageURL` and `@supportURL` point there, so the repository name and branch are
 part of the install link and should not change once readers have installed from it.
 `build/` and `node_modules/` are ignored.

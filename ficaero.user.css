@@ -5,9 +5,9 @@
 @description    FanFiction.net in the mid-2000s Frutiger Aero look with modern touches: paper or slate palette, centred page, launcher home, readable story lists, a proper reading column, console-style controls and motion. Works with the site's own font, width, spacing and contrast buttons. Icons: Silk by Mark James (famfamfam.com), CC BY 2.5, served from the site's own folder.
 @author         Hexfury
 @license        MIT
-@homepageURL    https://github.com/BladefuryDev/ficaero
-@supportURL     https://github.com/BladefuryDev/ficaero/issues
-@updateURL      https://raw.githubusercontent.com/BladefuryDev/ficaero/main/ficaero.user.css
+@homepageURL    https://github.com/BladefuryDev/FicAero
+@supportURL     https://github.com/BladefuryDev/FicAero/issues
+@updateURL      https://raw.githubusercontent.com/BladefuryDev/FicAero/main/ficaero.user.css
 @preprocessor   stylus
 
 @var select   theme      "Colour scheme" {
