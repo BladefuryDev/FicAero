@@ -1,4 +1,4 @@
-// Compile fanfiction-refresh.user.css the way the Stylus extension does:
+// Compile ficaero.user.css the way the Stylus extension does:
 // read the @var defaults from the UserStyle header, inject them as
 // Stylus-language assignments, compile the body, and write plain CSS.
 //
@@ -14,7 +14,7 @@ const stylus = require(path.join(stylusDir, 'node_modules', 'stylus'));
 const overrides = Object.fromEntries(process.argv.slice(3).map(a => a.split('=')));
 
 const root = path.join(__dirname, '..');
-const src = fs.readFileSync(path.join(root, 'fanfiction-refresh.user.css'), 'utf8');
+const src = fs.readFileSync(path.join(root, 'ficaero.user.css'), 'utf8');
 const header = src.match(/\/\* ==UserStyle==([\s\S]*?)==\/UserStyle== \*\//)[1];
 const body = src.slice(src.indexOf('==/UserStyle== */') + '==/UserStyle== */'.length);
 

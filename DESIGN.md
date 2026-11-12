@@ -1,4 +1,4 @@
-# FanFiction.net Refresh — design brief
+# FicAero — design brief
 
 **Theme: a retro game platform with modern touches.** The site was built in the
 mid-2000s and still ships the Silk icon set from that era. Instead of hiding that, the

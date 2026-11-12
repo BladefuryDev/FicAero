@@ -1,4 +1,8 @@
-# FanFiction.net Refresh
+# FicAero
+
+A FanFiction.net theme in the mid-2000s Frutiger Aero look: glossy accent surfaces, a
+console-dashboard home, cartridge story cards and a plain reading column. Named
+2026-11-12 (it was "FanFiction.net Refresh" until v0.15.2).
 
 A Stylus userstyle for fanfiction.net. The site's markup has not changed in years
 (Bootstrap 2 plus a thin layer of its own classes, no CSS custom properties), so the
@@ -8,7 +12,7 @@ theme works by stable ids and classes and should survive routine site updates.
 
 1. Install the Stylus extension (Firefox or Chromium).
 2. Open the raw file in the browser:
-   `https://raw.githubusercontent.com/BladefuryDev/fanfiction-refresh/main/fanfiction-refresh.user.css`
+   `https://raw.githubusercontent.com/BladefuryDev/ficaero/main/ficaero.user.css`
    (or drag a local copy onto a tab). Stylus recognises the `.user.css` name and offers
    to install it. Stylus then checks the header's `@updateURL` (the same raw file) and
    offers each new `@version`, so bumping the version and pushing is how fixes reach
@@ -324,12 +328,12 @@ setting", so the site's buttons keep working otherwise.
 ## Repository layout
 
 The folder is its own git repository (initialised 2026-11-12), meant to live at
-`github.com/BladefuryDev/fanfiction-refresh` on `main`; the header's `@updateURL`,
+`github.com/BladefuryDev/ficaero` on `main`; the header's `@updateURL`,
 `@homepageURL` and `@supportURL` point there, so the repository name and branch are
 part of the install link and should not change once readers have installed from it.
 `build/` and `node_modules/` are ignored.
 
-- `fanfiction-refresh.user.css` — the theme (Stylus-language preprocessor).
+- `ficaero.user.css` — the theme (Stylus-language preprocessor).
 - `tools/build.js` — compiles the theme the way the Stylus extension does, with the
   header defaults or overrides, into `build/`. Needs the `stylus` npm package:
   `npm install stylus@0.63.0` in some folder, then
