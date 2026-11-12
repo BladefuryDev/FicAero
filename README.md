@@ -11,7 +11,8 @@ theme works by stable ids and classes and should survive routine site updates.
 ## Install
 
 1. Install the Stylus extension (Firefox or Chromium).
-2. Open the raw file in the browser:
+2. Install from the UserStyles.world listing, https://userstyles.world/style/31451/ficaero,
+   which mirrors this repository, or open the raw file in the browser:
    `https://raw.githubusercontent.com/BladefuryDev/FicAero/main/ficaero.user.css`
    (or drag a local copy onto a tab). Stylus recognises the `.user.css` name and offers
    to install it. Stylus then checks the header's `@updateURL` (the same raw file) and
