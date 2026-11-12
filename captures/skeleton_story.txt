@@ -1,0 +1,59 @@
+Rendered DOM skeleton of https://www.fanfiction.net/s/14490010/1/Pokemon-Mystery-Dungeon-Starfall-Legacy
+(signed-out, 1024px viewport, 2026-11-11; scripts/styles/iframes dropped, hidden elements dropped, repeated siblings collapsed as xN)
+
+body.yes-fontsmoothing
+  div#top                                    (same as listing)
+  div.zmenu                                  (same as listing)
+  div#content_parent.xcontrast_outer
+    div#content_wrapper.xcontrast.maxwidth
+      div#content_wrapper_inner
+        div#pre_story_links.lc-wrapper
+          span.lc-left
+            img
+            a.xcontrast_txt [/Pok%C3%A9mon_and_Star-Trek-Online_Crossovers/80/9621/] "Pokémon + Star Trek Online Crossover"
+        div#profile_top
+          span
+            img.cimage                        <- cover
+          button.btn.pull-right.icon-heart "Follow/Fav"
+          b.xcontrast_txt "Pokemon Mystery Dungeon: Starfall Legacy"
+          span.xcontrast_txt
+            div
+          a.xcontrast_txt [/u/16665381/PRG-Central] "PRG-Central"
+          span.icon-mail-1.xcontrast_txt
+          a.xcontrast_txt [https://www.fanfiction.net/pm2/post.php?uid=16665381]
+          div.xcontrast_txt "summary..."
+          span.xgray.xcontrast_txt            <- "Rated: Fiction T - ... - Chapters: 16 - Words: 101,810 - ... - id: 14490010"
+            a.xcontrast_txt [https://www.fictionratings.com/] "Fiction  T"
+            a [/r/14490010/] "9"
+            span x2 "Nov 8"
+        div.lc-wrapper                        <- the site's own reader toolbar
+          div.lc
+            span.xcontrast_txt x2
+              span.icon-tl-text               (font family A / A)
+            span.icon-tl-text.xcontrast_txt
+            span.icon-align-justify.xcontrast_txt
+            span.icon-tl-text-height.xcontrast_txt
+            span.xcontrast_txt.icon-tl-contrast
+        span
+          select#chap_select "select 16 opts"
+          button.btn "Next >"
+        div
+        div#storytextp.storytextp
+          div#storytext.storytext.xcontrast_txt.nocopy   <- 82 <p> children, chapter text
+        div
+        div
+          select#chap_select                  <- second copy at the bottom (duplicate id)
+          button.btn "Next >"
+        div
+        div#review
+          table ... textarea#review_review, button#review_postbutton
+        div
+        div.lc-wrapper
+          div.lc
+            form > table
+              div#story_actions.btn-group (dropup "Actions")
+              div#share_providers.btn-group (dropup "Share")
+              button.btn.icon-heart "Follow/Favorite"
+        div
+  div#p_footer.maxwidth
+  div#cookie_notice.hv_center

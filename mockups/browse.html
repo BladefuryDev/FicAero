@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>FanFiction.net browse view — four samples</title>
+<style>
+  :root {
+    --ff-bg: #ecebe4; --ff-surface: #fbfaf7; --ff-surface-2: #f1efe8; --ff-input: #fff;
+    --ff-text: #1f2328; --ff-muted: #6b7280; --ff-border: #dcd8ce; --ff-link: #2f6fdb;
+    --ff-top: #262a5e; --ff-accent: #2f6fdb; --ff-accent-hi: #5086e1; --ff-ring: rgba(47,111,219,.28);
+    --ff-shadow: 0 1px 2px rgba(0,0,0,.06);
+    --ff-top-grad: linear-gradient(180deg, #343a7a 0%, #262a5e 60%, #1b1e48 100%);
+    --ff-accent-grad: linear-gradient(180deg, #5086e1 0%, #2f6fdb 55%, #225ec3 100%);
+    --ff-glass: linear-gradient(180deg, rgba(255,255,255,.16) 0%, rgba(255,255,255,.05) 50%, rgba(255,255,255,0) 50.5%);
+    --ff-edge-hi: inset 0 1px 0 rgba(255,255,255,.18);
+    --ease: cubic-bezier(.2,.8,.2,1);
+    color-scheme: light;
+  }
+  :root[data-theme="slate"] {
+    --ff-bg: #15171c; --ff-surface: #1e2128; --ff-surface-2: #272b34; --ff-input: #14161b;
+    --ff-text: #d9dde4; --ff-muted: #8c94a3; --ff-border: #343944; --ff-link: #7fa6ec;
+    --ff-top: #10121f; --ff-shadow: 0 1px 2px rgba(0,0,0,.4);
+    --ff-top-grad: linear-gradient(180deg, #1c2038 0%, #10121f 60%, #090b16 100%);
+    color-scheme: dark;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; background: var(--ff-bg); color: var(--ff-text); font: 14px/1.45 Verdana, 'Segoe UI', sans-serif; }
+  a { color: var(--ff-link); text-decoration: none; }
+  #top { background: var(--ff-glass), var(--ff-top-grad); box-shadow: var(--ff-edge-hi); color: #fff; display: flex; align-items: center; gap: 8px; padding: 10px 16px; font-size: 15px; }
+  #top .logo { font-weight: 700; font-size: 17px; color: #fff; }
+  #top small { opacity: .6; }
+  #top .right { margin-left: auto; }
+  #top .right button { color: #fff; background: rgba(255,255,255,.12); border: 0; padding: 4px 10px; border-radius: 6px; font-size: 13px; cursor: pointer; font-family: inherit; }
+  main { max-width: 1180px; margin: 16px auto 40px; padding: 0 16px; }
+  .card { background: var(--ff-surface); border: 1px solid var(--ff-border); border-radius: 10px; box-shadow: var(--ff-shadow); padding: 18px 22px; margin-bottom: 26px; }
+  h2.design { font-size: 13px; font-weight: 600; color: var(--ff-muted); margin: 26px 0 10px; }
+  h2.design span { color: var(--ff-text); }
+  .label { display: flex; align-items: center; gap: 10px; font-size: 11px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: var(--ff-muted); }
+  .label::before { content: '◆'; color: var(--ff-accent); font-size: 10px; }
+  .note { margin-top: 12px; padding-top: 10px; border-top: 1px dashed var(--ff-border); color: var(--ff-muted); font-size: 12px; line-height: 1.5; }
+  .note b { color: var(--ff-text); font-weight: 600; }
+  .count { font-family: Consolas, 'Cascadia Mono', monospace; font-size: 11px; color: var(--ff-muted); padding: 2px 7px; border-radius: 5px; border: 1px solid var(--ff-border); background: var(--ff-surface); white-space: nowrap; }
+
+  /* ===== shared toolbar: sort + letter rail ===== */
+  .toolbar { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; padding: 8px 10px; margin: 0 0 14px; background: var(--ff-surface-2); border: 1px solid var(--ff-border); border-radius: 10px; position: sticky; top: 0; z-index: 5; }
+  .toolbar .label { margin-right: auto; }
+  .seg { display: inline-flex; border: 1px solid var(--ff-border); border-radius: 8px; overflow: hidden; background: var(--ff-surface); }
+  .seg a { padding: 0 12px; height: 32px; display: inline-flex; align-items: center; font-size: 13px; font-weight: 500; color: var(--ff-text); transition: background .12s var(--ease); }
+  .seg a + a { border-left: 1px solid var(--ff-border); }
+  .seg a.on { background: var(--ff-glass), var(--ff-accent-grad); color: #fff; text-shadow: 0 1px 0 rgba(0,0,0,.2); }
+  .rail { display: flex; gap: 3px; flex-wrap: wrap; }
+  .rail a { display: inline-flex; align-items: center; justify-content: center; min-width: 26px; height: 26px; padding: 0 6px; border-radius: 6px; font-size: 12px; font-weight: 600; color: var(--ff-text); border: 1px solid transparent; transition: background .12s var(--ease), border-color .12s var(--ease), transform .12s var(--ease); }
+  .rail a:hover { background: var(--ff-surface); border-color: var(--ff-border); transform: translateY(-1px); }
+  .rail a.on { background: var(--ff-glass), var(--ff-accent-grad); color: #fff; }
+
+  /* ===== A. Tile wall ===== */
+  .wall { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+  .wtile { display: flex; align-items: center; gap: 10px; height: 44px; padding: 0 12px 0 14px; border-radius: 10px; background: var(--ff-surface-2); border: 1px solid var(--ff-border); color: var(--ff-text); font-weight: 600; font-size: 13.5px; position: relative; overflow: hidden; transition: transform .12s var(--ease), box-shadow .18s var(--ease), border-color .15s var(--ease); }
+  .wtile .name { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .wtile:hover { transform: translateY(-2px); border-color: var(--ff-accent); box-shadow: inset 3px 0 0 var(--ff-accent), 0 6px 16px rgba(0,0,0,.12); }
+  .wtile:active { transform: scale(.97); }
+
+  /* ===== B. Top shelf + tail ===== */
+  .shelf { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 14px; }
+  .cart { display: grid; grid-template-columns: 52px 1fr; border: 1px solid var(--ff-border); border-radius: 12px; overflow: hidden; background: var(--ff-surface-2); transition: transform .14s var(--ease), box-shadow .18s var(--ease), border-color .15s var(--ease); }
+  .cart:hover { transform: translateY(-2px); border-color: var(--ff-accent); box-shadow: 0 8px 20px rgba(0,0,0,.12); }
+  .cart .well { background: var(--ff-glass), var(--ff-top-grad); box-shadow: var(--ff-edge-hi); display: flex; align-items: center; justify-content: center; }
+  .cart .well i { width: 28px; height: 28px; border-radius: 7px; background: rgba(255,255,255,.14); display: block; position: relative; }
+  .cart .well i::after { content: ''; position: absolute; inset: 7px 5px; border-radius: 4px; border: 2px solid rgba(255,255,255,.85); }
+  .cart .body { padding: 10px 12px; display: flex; flex-direction: column; gap: 6px; }
+  .cart .name { font-weight: 700; font-size: 14px; color: var(--ff-text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .cart .rank { font-size: 10px; letter-spacing: 1.5px; color: var(--ff-muted); font-weight: 700; }
+  .tail { display: flex; flex-wrap: wrap; gap: 6px; }
+  .tail a { display: inline-flex; align-items: center; gap: 8px; height: 30px; padding: 0 10px; border-radius: 7px; border: 1px solid var(--ff-border); background: var(--ff-surface); color: var(--ff-text); font-size: 12.5px; font-weight: 500; transition: border-color .12s var(--ease), background .12s var(--ease); }
+  .tail a:hover { border-color: var(--ff-accent); background: var(--ff-surface-2); }
+  .tail a .count { padding: 0 5px; border: 0; background: transparent; }
+
+  /* ===== C. Console columns + sticky rail ===== */
+  .cols { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0 18px; }
+  .crow { display: flex; align-items: center; gap: 10px; height: 34px; padding: 0 10px 0 26px; border-radius: 7px; color: var(--ff-text); position: relative; font-size: 13.5px; transition: background .1s var(--ease), box-shadow .12s var(--ease); }
+  .crow:nth-child(even) { background: color-mix(in srgb, var(--ff-surface-2) 50%, transparent); }
+  .crow::before { content: '▸'; position: absolute; left: 9px; color: var(--ff-accent); font-size: 12px; opacity: 0; transform: translateX(-4px); transition: opacity .12s var(--ease), transform .12s var(--ease); }
+  .crow:hover { background: var(--ff-surface-2); box-shadow: inset 3px 0 0 var(--ff-accent); }
+  .crow:hover::before { opacity: 1; transform: translateX(0); }
+  .crow .name { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+  /* ===== D. Leaderboard ===== */
+  .board { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 18px; counter-reset: rank; }
+  .brow { counter-increment: rank; display: flex; align-items: center; gap: 12px; height: 40px; padding: 0 12px 0 8px; border-radius: 9px; border: 1px solid var(--ff-border); background: var(--ff-surface-2); color: var(--ff-text); font-weight: 600; font-size: 13.5px; transition: transform .12s var(--ease), border-color .15s var(--ease), box-shadow .18s var(--ease); }
+  .brow::before { content: counter(rank, decimal-leading-zero); width: 34px; height: 26px; border-radius: 6px; display: inline-flex; align-items: center; justify-content: center; font: 700 11px/1 Consolas, 'Cascadia Mono', monospace; letter-spacing: .5px; color: var(--ff-muted); background: var(--ff-surface); border: 1px solid var(--ff-border); }
+  .brow:nth-child(-n+3)::before { background: var(--ff-glass), var(--ff-accent-grad); color: #fff; border-color: transparent; text-shadow: 0 1px 0 rgba(0,0,0,.2); }
+  .brow .name { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .brow:hover { transform: translateY(-1px); border-color: var(--ff-accent); box-shadow: 0 6px 16px rgba(0,0,0,.1); }
+  @media (max-width: 760px) { .wall, .shelf { grid-template-columns: 1fr 1fr; } .cols { grid-template-columns: 1fr; } .board { grid-template-columns: 1fr; } }
+  footer { display: flex; justify-content: center; gap: 22px; height: 40px; align-items: center; border-top: 1px solid var(--ff-border); background: var(--ff-surface); color: var(--ff-muted); font-size: 12px; }
+</style>
+</head>
+<body>
+<div id="top"><span class="logo">FanFiction</span><small>|</small><span>unleash your imagination</span><div class="right"><button id="theme" type="button">Paper / Slate</button></div></div>
+<main>
+
+  <h2 class="design">Shared <span>Toolbar</span> — the site's "Sort by / Filter by name" line as a sticky bar: section label with the count, segmented sort, letter rail</h2>
+  <div class="card">
+    <div class="toolbar"><div class="label">Game crossovers · 1,399</div><div class="seg"><a class="on" href="#">Popularity</a><a href="#">Name</a></div><div class="rail" id="rail"></div></div>
+    <div class="note"><b>Translation:</b> one to one. The sort and letter links already exist and re-render the list through the site's own script; the bar restyles them and sticks under the menu. The "on" state is a mockup liberty: the site does not mark the active sort or letter.</div>
+  </div>
+
+  <h2 class="design">Sample A <span>Tile wall</span> — every entry a launcher tile, four across, count as a tag, cursor on hover</h2>
+  <div class="card"><div class="wall" id="A"></div>
+    <div class="note"><b>Translation:</b> feasible. The list is a three-column table of divs; flattening it with <code>display: contents</code> and a grid on the container gives the wall. Order stays the site's (popularity reads left to right, top to bottom). 1,399 tiles make a long wall, but each row holds four.</div></div>
+
+  <h2 class="design">Sample B <span>Top shelf + tail</span> — the first twelve as cartridges with the navy well, the rest as a wrapping tail of chips</h2>
+  <div class="card"><div class="shelf" id="B1"></div><div class="tail" id="B2"></div>
+    <div class="note"><b>Translation:</b> feasible for the popularity order: the first column's first twelve divs are the top twelve. Under the Name sort the shelf would show the first twelve alphabetically, which is harmless but less meaningful. The well glyph is a Silk icon per category (controller for games).</div></div>
+
+  <h2 class="design">Sample C <span>Console columns</span> — the site's three columns kept, each entry a console row with the count right-aligned; the toolbar's rail does the jumping</h2>
+  <div class="card"><div class="cols" id="C"></div>
+    <div class="note"><b>Translation:</b> one to one. Densest option: about 45 entries per screen. Best paired with the sticky letter rail for the Name sort.</div></div>
+
+  <h2 class="design">Sample D <span>Leaderboard</span> — ranked rows with a numbered badge, top three in the accent gloss, two columns</h2>
+  <div class="card"><div class="board" id="D"></div>
+    <div class="note"><b>Translation:</b> feasible. The numbers come from CSS counters over the entries in document order, which is the popularity order. Under the Name sort the numbers become alphabetical positions, so the badges would be hidden for that view (the site swaps the list in place, so the theme can only tell the views apart if the toolbar marks them; see the toolbar note).</div></div>
+
+</main>
+<footer><a href="#">Help</a><a href="#">Cookies</a><a href="#">Privacy</a><a href="#">Terms of Service</a><a href="#">Top</a></footer>
+<script>
+  const entries = [["Pokémon","9,919"],["Sonic the Hedgehog","6,121"],["Kingdom Hearts","5,756"],["Mass Effect","3,650"],["Halo","3,543"],["Legend of Zelda","2,913"],["Mario","2,846"],["Final Fantasy VII","2,606"],["Warhammer","2,498"],["Elder Scrolls series","2,089"],["Super Smash Brothers","1,977"],["Persona Series","1,910"],["Undertale","1,791"],["Devil May Cry","1,598"],["Five Nights at Freddy's","1,537"],["Assassin's Creed","1,480"],["Fallout","1,430"],["Fire Emblem","1,425"],["Resident Evil","1,164"],["Touhou Project","1,135"],["Final Fantasy XIII","979"],["Dragon Age","965"],["Minecraft","933"],["Mega Man","894"],["Star Wars","883"],["Warcraft","839"],["Destiny","815"],["Mortal Kombat","814"],["Danganronpa","731"],["Call of Duty","690"],["Prototype","687"],["Team Fortress 2","682"],["Spyro the Dragon","608"],["Ace Attorney series","604"],["Overwatch","570"],["Dark Souls","569"],["Genshin Impact","567"],["Portal","566"],["Dungeons and Dragons","548"],["League of Legends","542"]];
+  rail.innerHTML = ['All','#',...'ABCDEFGHIJKLMNOPQRSTUVWXYZ'].map((l,i) => `<a href="#"${i===0?' class="on"':''}>${l}</a>`).join('');
+  A.innerHTML = entries.slice(0,24).map(([n,c]) => `<a class="wtile" href="#"><span class="name">${n}</span><span class="count">${c}</span></a>`).join('');
+  B1.innerHTML = entries.slice(0,12).map(([n,c],i) => `<a class="cart" href="#"><span class="well"><i></i></span><span class="body"><span class="rank">#${String(i+1).padStart(2,'0')}</span><span class="name">${n}</span><span class="count" style="align-self:flex-start">${c}</span></span></a>`).join('');
+  B2.innerHTML = entries.slice(12,40).map(([n,c]) => `<a href="#">${n}<span class="count">${c}</span></a>`).join('');
+  const third = Math.ceil(entries.length/3);
+  C.innerHTML = [0,1,2].map(k => `<div>${entries.slice(k*third,(k+1)*third).map(([n,c]) => `<a class="crow" href="#"><span class="name">${n}</span><span class="count">${c}</span></a>`).join('')}</div>`).join('');
+  D.innerHTML = entries.slice(0,20).map(([n,c]) => `<a class="brow" href="#"><span class="name">${n}</span><span class="count">${c}</span></a>`).join('');
+  theme.onclick = () => document.documentElement.dataset.theme = document.documentElement.dataset.theme === 'slate' ? '' : 'slate';
+</script>
+</body>
+</html>

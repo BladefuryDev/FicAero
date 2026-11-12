@@ -1,0 +1,196 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>FanFiction.net home — two designs</title>
+<style>
+  /* Palette: same tokens as the theme */
+  :root {
+    --ff-bg: #ecebe4; --ff-surface: #fbfaf7; --ff-surface-2: #f1efe8; --ff-input: #fff;
+    --ff-text: #1f2328; --ff-muted: #6b7280; --ff-border: #dcd8ce; --ff-link: #2f6fdb;
+    --ff-top: #262a5e; --ff-accent: #2f6fdb; --ff-ring: rgba(47,111,219,.28);
+    --ff-shadow: 0 1px 2px rgba(0,0,0,.06);
+    --ease: cubic-bezier(.2,.8,.2,1);
+    color-scheme: light;
+  }
+  :root[data-theme="slate"] {
+    --ff-bg: #15171c; --ff-surface: #1e2128; --ff-surface-2: #272b34; --ff-input: #14161b;
+    --ff-text: #d9dde4; --ff-muted: #8c94a3; --ff-border: #343944; --ff-link: #7fa6ec;
+    --ff-top: #10121f; --ff-shadow: 0 1px 2px rgba(0,0,0,.4);
+    color-scheme: dark;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; background: var(--ff-bg); color: var(--ff-text); font: 14px/1.45 Verdana, 'Segoe UI', sans-serif; }
+  a { color: var(--ff-link); text-decoration: none; }
+
+  /* --- chrome, approximating the themed site --- */
+  #top { background: var(--ff-top); color: #fff; display: flex; align-items: center; gap: 8px; padding: 10px 16px; font-size: 15px; }
+  #top .logo { font-weight: 700; font-size: 17px; color: #fff; }
+  #top small { opacity: .6; }
+  #top .right { margin-left: auto; display: flex; gap: 6px; }
+  #top .right a, #top .right button { color: #fff; background: rgba(255,255,255,.12); border: 0; padding: 4px 10px; border-radius: 6px; font-size: 13px; cursor: pointer; font-family: inherit; transition: background .15s var(--ease), transform .12s var(--ease); }
+  #top .right a:hover, #top .right button:hover { background: rgba(255,255,255,.22); transform: translateY(-1px); }
+  .zmenu { background: var(--ff-surface); border-bottom: 1px solid var(--ff-border); padding: 6px 10px; display: flex; justify-content: center; align-items: center; gap: 18px; position: sticky; top: 0; z-index: 5; box-shadow: var(--ff-shadow); }
+  .zmenu .items { display: flex; gap: 4px; }
+  .zmenu .items a { display: inline-flex; align-items: center; gap: 7px; height: 34px; padding: 0 12px; border-radius: 8px; border: 1px solid transparent; color: var(--ff-text); font-weight: 500; transition: background .15s var(--ease), border-color .15s var(--ease), transform .12s var(--ease), box-shadow .18s var(--ease); }
+  .zmenu .items a:hover { background: var(--ff-surface-2); border-color: var(--ff-border); transform: translateY(-1px); box-shadow: 0 3px 10px rgba(0,0,0,.12); }
+  .caret { width: 0; height: 0; border: 4px solid transparent; border-top-color: currentColor; opacity: .6; margin-top: 4px; }
+  .search { display: inline-flex; height: 34px; }
+  .search button { height: 34px; padding: 0 10px 0 12px; border-radius: 8px 0 0 8px; border: 1px solid var(--ff-border); border-right: 0; background: var(--ff-surface); color: var(--ff-text); font-weight: 500; font-family: inherit; display: inline-flex; align-items: center; gap: 7px; }
+  .search input { height: 34px; width: 200px; padding: 0 12px; border-radius: 0 8px 8px 0; border: 1px solid var(--ff-border); background: var(--ff-input); color: var(--ff-text); font: inherit; transition: width .2s var(--ease), box-shadow .18s var(--ease), border-color .15s var(--ease); }
+  .search input:focus { width: 260px; outline: 0; border-color: var(--ff-accent); box-shadow: 0 0 0 3px var(--ff-ring); }
+
+  /* --- page --- */
+  main { max-width: 1180px; margin: 16px auto 0; padding: 0 16px; }
+  .card { background: var(--ff-surface); border: 1px solid var(--ff-border); border-radius: 10px; box-shadow: var(--ff-shadow); padding: 18px 22px; margin-bottom: 28px; }
+  .label { display: flex; align-items: center; gap: 10px; margin: 0 0 12px; font-size: 12px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: var(--ff-muted); }
+  .label::before { content: '◆'; color: var(--ff-accent); font-size: 10px; }
+  .label .note { margin-left: auto; letter-spacing: 0; text-transform: none; font-weight: 400; font-size: 12px; }
+  h2.design { font-size: 13px; font-weight: 600; color: var(--ff-muted); margin: 26px 0 10px; letter-spacing: .3px; }
+  h2.design span { color: var(--ff-text); }
+
+  /* ===== A. Launcher tiles ===== */
+  .tiles { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; }
+  .tile { display: flex; align-items: center; gap: 12px; height: 64px; padding: 0 14px; border-radius: 10px; background: var(--ff-surface-2); border: 1px solid var(--ff-border); color: var(--ff-text); font-weight: 600; position: relative; overflow: hidden; transition: transform .12s var(--ease), box-shadow .18s var(--ease), border-color .15s var(--ease); }
+  .tile::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; background: var(--ff-accent); transform: scaleY(0); transform-origin: center; transition: transform .16s var(--ease); }
+  .tile svg { width: 22px; height: 22px; stroke: var(--ff-accent); fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; flex: none; }
+  .tile:hover { transform: translateY(-2px); box-shadow: 0 6px 16px rgba(0,0,0,.12); border-color: var(--ff-accent); }
+  .tile:hover::before { transform: scaleY(1); }
+  .tile:active { transform: translateY(0) scale(.97); box-shadow: none; transition-duration: .06s; }
+  .tile .sub { display: block; font-weight: 400; font-size: 11px; color: var(--ff-muted); }
+  .section + .section { margin-top: 18px; }
+  @media (max-width: 900px) { .tiles { grid-template-columns: repeat(3, 1fr); } }
+  @media (max-width: 560px) { .tiles { grid-template-columns: repeat(2, 1fr); } }
+
+  /* ===== B. Two-column matrix ===== */
+  .matrix { display: grid; grid-template-columns: 1fr 1fr; gap: 0 28px; }
+  .matrix .col .label { margin-bottom: 6px; }
+  .matrix .row { display: flex; align-items: center; gap: 10px; height: 38px; padding: 0 14px 0 30px; border-radius: 8px; color: var(--ff-text); position: relative; transition: background .1s var(--ease), box-shadow .12s var(--ease); }
+  .matrix .row::before { content: '▸'; position: absolute; left: 12px; color: var(--ff-accent); font-size: 12px; opacity: 0; transition: opacity .12s var(--ease), transform .12s var(--ease); }
+  .matrix .row:hover { background: var(--ff-surface-2); box-shadow: inset 3px 0 0 var(--ff-accent); }
+  .matrix .row:hover::before { opacity: 1; transform: translateX(2px); }
+  .matrix .row:active { transform: scale(.985); }
+  .matrix .row .k { margin-left: auto; font-size: 11px; color: var(--ff-muted); letter-spacing: 1px; }
+  .matrix .row:nth-child(even) { background: color-mix(in srgb, var(--ff-surface-2) 45%, transparent); }
+  .matrix .row:nth-child(even):hover { background: var(--ff-surface-2); }
+  @media (max-width: 700px) { .matrix { grid-template-columns: 1fr; } .matrix .col + .col { margin-top: 18px; } }
+
+  /* ===== C. Hybrid: matrix layout, tile buttons ===== */
+  .hybrid { display: grid; grid-template-columns: 1fr 1fr; gap: 0 28px; }
+  .hybrid .col .label { margin-bottom: 10px; }
+  .hybrid .list { display: grid; gap: 8px; }
+  .hbtn { display: flex; align-items: center; gap: 12px; height: 46px; padding: 0 14px 0 16px; border-radius: 10px; background: var(--ff-surface-2); border: 1px solid var(--ff-border); color: var(--ff-text); font-weight: 600; position: relative; overflow: hidden; transition: transform .12s var(--ease), box-shadow .18s var(--ease), border-color .15s var(--ease), background .15s var(--ease); }
+  .hbtn::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; background: var(--ff-accent); transform: scaleY(0); transition: transform .16s var(--ease); }
+  .hbtn svg { width: 20px; height: 20px; stroke: var(--ff-accent); fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; flex: none; }
+  .hbtn .k { margin-left: auto; font-size: 10px; font-weight: 700; letter-spacing: 1.2px; color: var(--ff-muted); padding: 3px 7px; border-radius: 5px; border: 1px solid var(--ff-border); background: var(--ff-surface); transition: color .15s var(--ease), border-color .15s var(--ease); }
+  .hbtn .arrow { color: var(--ff-accent); font-size: 12px; opacity: 0; transform: translateX(-4px); transition: opacity .12s var(--ease), transform .12s var(--ease); }
+  .hbtn:hover { transform: translateY(-2px); box-shadow: 0 6px 16px rgba(0,0,0,.12); border-color: var(--ff-accent); }
+  .hbtn:hover::before { transform: scaleY(1); }
+  .hbtn:hover .arrow { opacity: 1; transform: translateX(0); }
+  .hbtn:hover .k { color: var(--ff-accent); border-color: var(--ff-ring); }
+  .hbtn:active { transform: translateY(0) scale(.97); box-shadow: none; transition-duration: .06s; }
+  /* crossover column: a second, dimmer glyph behind the first hints at "two worlds" */
+  .hbtn.x svg { stroke: var(--ff-accent); }
+  .hbtn.x .k { background: var(--ff-accent); color: #fff; border-color: transparent; }
+  .hbtn.x:hover .k { color: #fff; }
+  @media (max-width: 700px) { .hybrid { grid-template-columns: 1fr; } .hybrid .col + .col { margin-top: 18px; } }
+
+  /* tweets switch demo */
+  .tweets { margin-top: 18px; padding: 10px 14px; border: 1px dashed var(--ff-border); border-radius: 8px; color: var(--ff-muted); font-size: 12px; display: flex; align-items: center; gap: 10px; }
+  .tweets b { color: var(--ff-text); font-weight: 600; }
+
+  footer { display: flex; justify-content: center; align-items: center; gap: 22px; height: 40px; border-top: 1px solid var(--ff-border); background: var(--ff-surface); color: var(--ff-muted); font-size: 12px; margin-top: 30px; }
+  footer a { color: var(--ff-muted); padding: 4px 2px; border-bottom: 1px solid transparent; }
+  footer a:hover { color: var(--ff-text); border-bottom-color: var(--ff-accent); }
+</style>
+</head>
+<body>
+
+<div id="top">
+  <a class="logo" href="#">FanFiction</a><small>|</small><span>unleash your imagination</span>
+  <div class="right"><button id="theme" type="button">Paper / Slate</button><a href="#">Login</a><a href="#">Sign Up</a></div>
+</div>
+<nav class="zmenu">
+  <div class="items">
+    <a href="#">Browse <i class="caret"></i></a><a href="#">Just In <i class="caret"></i></a><a href="#">Community <i class="caret"></i></a><a href="#">Forum <i class="caret"></i></a><a href="#">Betas <i class="caret"></i></a>
+  </div>
+  <div class="search"><button type="button">Story <i class="caret"></i></button><input placeholder="Search"></div>
+</nav>
+
+<main>
+
+  <h2 class="design">Design C <span>Hybrid</span> — the matrix's aligned columns, each row a tile button with glyph, edge and lift</h2>
+  <div class="card">
+    <div class="hybrid">
+      <div class="col">
+        <div class="label">Fanfiction <span class="note">stories in one world</span></div>
+        <div class="list" id="hybridA"></div>
+      </div>
+      <div class="col">
+        <div class="label">Crossovers <span class="note">two worlds, one story</span></div>
+        <div class="list" id="hybridB"></div>
+      </div>
+    </div>
+    <div class="tweets"><b>Tweets by FictionPress</b> hidden by default; a theme switch shows the embed here.</div>
+  </div>
+
+  <h2 class="design">Design A <span>Launcher tiles</span> — two sections, nine tiles each, glyph + name, lift on hover</h2>
+  <div class="card">
+    <div class="section">
+      <div class="label">Fanfiction <span class="note">stories in one world</span></div>
+      <div class="tiles" id="tilesA"></div>
+    </div>
+    <div class="section">
+      <div class="label">Crossovers <span class="note">two worlds, one story</span></div>
+      <div class="tiles" id="tilesB"></div>
+    </div>
+    <div class="tweets"><b>Tweets by FictionPress</b> hidden by default; a theme switch shows the embed here.</div>
+  </div>
+
+  <h2 class="design">Design B <span>Two-column matrix</span> — one panel, rows aligned by category, console menu entries</h2>
+  <div class="card">
+    <div class="matrix">
+      <div class="col">
+        <div class="label">Fanfiction</div>
+        <div id="matrixA"></div>
+      </div>
+      <div class="col">
+        <div class="label">Crossovers</div>
+        <div id="matrixB"></div>
+      </div>
+    </div>
+    <div class="tweets"><b>Tweets by FictionPress</b> hidden by default; a theme switch shows the embed here.</div>
+  </div>
+
+</main>
+
+<footer><a href="#">Help</a><a href="#">Cookies</a><a href="#">Privacy</a><a href="#">Terms of Service</a><a href="#">Top</a></footer>
+
+<script>
+  // The nine real categories and their paths, with simple line glyphs.
+  const cats = [
+    ['Anime/Manga', 'anime',   '<path d="M12 3l2.6 5.4 5.9.8-4.3 4.1 1 5.9L12 16.4 6.8 19.2l1-5.9L3.5 9.2l5.9-.8z"/>'],
+    ['Books',       'book',    '<path d="M4 4h7a3 3 0 0 1 3 3v13a2 2 0 0 0-2-2H4z"/><path d="M20 4h-7a3 3 0 0 0-3 3v13a2 2 0 0 1 2-2h8z"/>'],
+    ['Cartoons',    'cartoon', '<circle cx="12" cy="12" r="8"/><path d="M8.5 10h.01M15.5 10h.01M8.5 14.5c1.5 1.5 5.5 1.5 7 0"/>'],
+    ['Comics',      'comic',   '<path d="M4 5h16v11H9l-5 4z"/><path d="M8 9h8M8 12h5"/>'],
+    ['Games',       'game',    '<rect x="3" y="7" width="18" height="10" rx="4"/><path d="M8 10v4M6 12h4M15 11h.01M17.5 13h.01"/>'],
+    ['Misc',        'misc',    '<circle cx="6" cy="12" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="18" cy="12" r="1.5"/>'],
+    ['Movies',      'movie',   '<rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 9h18M3 15h18M8 5v14M16 5v14"/>'],
+    ['Plays',       'play',    '<path d="M4 6c3 0 5 2 8 2s5-2 8-2v6c0 4-4 6-8 6s-8-2-8-6z"/><path d="M8 11h.01M16 11h.01M10 14c1 .8 3 .8 4 0"/>'],
+    ['TV',          'tv',      '<rect x="3" y="7" width="18" height="12" rx="2"/><path d="M8 3l4 4 4-4"/>'],
+  ];
+  const svg = d => `<svg viewBox="0 0 24 24" aria-hidden="true">${d}</svg>`;
+  const tile = (name, path, cross) => `<a class="tile" href="https://www.fanfiction.net/${cross ? 'crossovers/' : ''}${path}/">${svg(cats.find(c => c[1] === path)[2])}<span>${name}${cross ? '<span class="sub">crossovers</span>' : ''}</span></a>`;
+  const row  = (name, path, cross) => `<a class="row" href="https://www.fanfiction.net/${cross ? 'crossovers/' : ''}${path}/">${name}<span class="k">${cross ? 'X' : 'FF'}</span></a>`;
+  const hbtn = (name, path, cross) => `<a class="hbtn${cross ? ' x' : ''}" href="https://www.fanfiction.net/${cross ? 'crossovers/' : ''}${path}/">${svg(cats.find(c => c[1] === path)[2])}<span>${name}</span><span class="arrow">▸</span><span class="k">${cross ? 'X' : 'FF'}</span></a>`;
+  hybridA.innerHTML = cats.map(c => hbtn(c[0], c[1], false)).join('');
+  hybridB.innerHTML = cats.map(c => hbtn(c[0], c[1], true)).join('');
+  tilesA.innerHTML = cats.map(c => tile(c[0], c[1], false)).join('');
+  tilesB.innerHTML = cats.map(c => tile(c[0], c[1], true)).join('');
+  matrixA.innerHTML = cats.map(c => row(c[0], c[1], false)).join('');
+  matrixB.innerHTML = cats.map(c => row(c[0], c[1], true)).join('');
+  theme.onclick = () => document.documentElement.dataset.theme = document.documentElement.dataset.theme === 'slate' ? '' : 'slate';
+</script>
+</body>
+</html>

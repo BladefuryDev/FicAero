@@ -1,0 +1,171 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>FanFiction.net story cards — four samples</title>
+<style>
+  :root {
+    --ff-bg: #ecebe4; --ff-surface: #fbfaf7; --ff-surface-2: #f1efe8; --ff-input: #fff;
+    --ff-text: #1f2328; --ff-muted: #6b7280; --ff-border: #dcd8ce; --ff-link: #2f6fdb;
+    --ff-visited: #7a4fb5; --ff-reviews: #c2410c; --ff-top: #262a5e; --ff-accent: #2f6fdb;
+    --ff-accent-hi: #5086e1; --ff-ring: rgba(47,111,219,.28); --ff-shadow: 0 1px 2px rgba(0,0,0,.06);
+    --ff-top-grad: linear-gradient(180deg, #343a7a 0%, #262a5e 60%, #1b1e48 100%);
+    --ff-accent-grad: linear-gradient(180deg, #5086e1 0%, #2f6fdb 55%, #225ec3 100%);
+    --ff-glass: linear-gradient(180deg, rgba(255,255,255,.16) 0%, rgba(255,255,255,.05) 50%, rgba(255,255,255,0) 50.5%);
+    --ff-edge-hi: inset 0 1px 0 rgba(255,255,255,.18);
+    --ease: cubic-bezier(.2,.8,.2,1);
+    color-scheme: light;
+  }
+  :root[data-theme="slate"] {
+    --ff-bg: #15171c; --ff-surface: #1e2128; --ff-surface-2: #272b34; --ff-input: #14161b;
+    --ff-text: #d9dde4; --ff-muted: #8c94a3; --ff-border: #343944; --ff-link: #7fa6ec;
+    --ff-visited: #b79cf0; --ff-reviews: #f0956a; --ff-top: #10121f; --ff-shadow: 0 1px 2px rgba(0,0,0,.4);
+    --ff-top-grad: linear-gradient(180deg, #1c2038 0%, #10121f 60%, #090b16 100%);
+    color-scheme: dark;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; background: var(--ff-bg); color: var(--ff-text); font: 14px/1.45 Verdana, 'Segoe UI', sans-serif; }
+  a { color: var(--ff-link); text-decoration: none; }
+  #top { background: var(--ff-glass), var(--ff-top-grad); box-shadow: var(--ff-edge-hi); color: #fff; display: flex; align-items: center; gap: 8px; padding: 10px 16px; font-size: 15px; }
+  #top .logo { font-weight: 700; font-size: 17px; color: #fff; }
+  #top small { opacity: .6; }
+  #top .right { margin-left: auto; display: flex; gap: 6px; }
+  #top .right button { color: #fff; background: rgba(255,255,255,.12); border: 0; padding: 4px 10px; border-radius: 6px; font-size: 13px; cursor: pointer; font-family: inherit; }
+  main { max-width: 1180px; margin: 16px auto 40px; padding: 0 16px; }
+  .card { background: var(--ff-surface); border: 1px solid var(--ff-border); border-radius: 10px; box-shadow: var(--ff-shadow); padding: 18px 22px; margin-bottom: 26px; }
+  h2.design { font-size: 13px; font-weight: 600; color: var(--ff-muted); margin: 26px 0 10px; }
+  h2.design span { color: var(--ff-text); }
+  .status { display: flex; align-items: center; gap: 8px; margin: 0 0 10px; font-size: 11px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: var(--ff-muted); }
+  .status::before { content: '◆'; color: var(--ff-accent); font-size: 10px; }
+  .note { margin-top: 12px; padding-top: 10px; border-top: 1px dashed var(--ff-border); color: var(--ff-muted); font-size: 12px; line-height: 1.5; }
+  .note b { color: var(--ff-text); font-weight: 600; }
+
+  /* shared pieces */
+  .cover { width: 50px; height: 66px; border-radius: 6px; border: 1px solid var(--ff-border); background: linear-gradient(160deg, #1c2446, #0b0e1f); position: relative; flex: none; overflow: hidden; }
+  .cover::after { content: ''; position: absolute; left: 30%; top: 38%; width: 4px; height: 4px; border-radius: 50%; background: #fff; box-shadow: 10px 10px 0 -1px #9fc5ff, 18px -6px 0 -2px #fff, 4px 20px 0 -2px #fff; }
+  .title { font-size: 15px; font-weight: 600; line-height: 1.3; color: var(--ff-link); }
+  .title.visited { color: var(--ff-visited); }
+  .by { color: var(--ff-text); font-size: 13px; }
+  .by a { font-weight: 500; }
+  .reviews { color: var(--ff-reviews); font-size: 12px; }
+  .summary { line-height: 1.5; margin: 6px 0 0; }
+  .meta { font-size: 12px; color: var(--ff-muted); line-height: 1.6; margin-top: 6px; }
+  .latest { display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; border-radius: 8px; border: 1px solid var(--ff-border); background: var(--ff-surface-2); color: var(--ff-accent); font-size: 12px; flex: none; transition: transform .12s var(--ease), box-shadow .18s var(--ease), border-color .15s var(--ease); }
+  .latest:hover { transform: translateY(-1px); border-color: var(--ff-accent); box-shadow: 0 3px 10px rgba(0,0,0,.12); }
+
+  /* ===== A. Dossier row (closest to the real markup) ===== */
+  .rowA { display: grid; grid-template-columns: 50px 1fr auto; gap: 14px; align-items: start; padding: 12px 12px; border: 1px solid var(--ff-border); border-radius: 10px; background: var(--ff-surface-2); position: relative; transition: transform .14s var(--ease), box-shadow .18s var(--ease), border-color .15s var(--ease); }
+  .rowA + .rowA { margin-top: 8px; }
+  .rowA::before { content: ''; position: absolute; left: 0; top: 10px; bottom: 10px; width: 3px; border-radius: 0 3px 3px 0; background: var(--ff-accent); transform: scaleY(0); transition: transform .16s var(--ease); }
+  .rowA:hover { transform: translateX(3px); border-color: var(--ff-accent); box-shadow: 0 6px 16px rgba(0,0,0,.10); }
+  .rowA:hover::before { transform: scaleY(1); }
+  .rowA .head { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .rowA .summary { color: var(--ff-text); }
+
+  /* ===== B. Cartridge card (stat strip) ===== */
+  .cardB { display: grid; grid-template-columns: 88px 1fr; border: 1px solid var(--ff-border); border-radius: 12px; overflow: hidden; background: var(--ff-surface-2); transition: transform .14s var(--ease), box-shadow .18s var(--ease), border-color .15s var(--ease); }
+  .cardB + .cardB { margin-top: 10px; }
+  .cardB:hover { transform: translateY(-2px); border-color: var(--ff-accent); box-shadow: 0 8px 20px rgba(0,0,0,.12); }
+  .cardB .spine { background: var(--ff-glass), var(--ff-top-grad); display: flex; align-items: center; justify-content: center; padding: 14px 0; box-shadow: var(--ff-edge-hi); }
+  /* the cover as a small book: spine strip on the left, page edges on the right */
+  .cardB .book { position: relative; width: 60px; height: 80px; transform: perspective(260px) rotateY(-6deg); transform-origin: left center; transition: transform .22s var(--ease), filter .22s var(--ease); filter: drop-shadow(4px 5px 7px rgba(0,0,0,.42)); }
+  .cardB:hover .book { transform: perspective(260px) rotateY(0deg); filter: drop-shadow(3px 4px 6px rgba(0,0,0,.38)); }
+  .cardB .book .cover { width: 100%; height: 100%; border: 0; border-radius: 2px 5px 5px 2px; box-shadow: inset 0 0 0 1px rgba(255,255,255,.12); }
+  .cardB .book::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 8px; border-radius: 2px 0 0 2px; background: linear-gradient(90deg, rgba(0,0,0,.55) 0%, rgba(0,0,0,.25) 55%, rgba(255,255,255,.18) 80%, rgba(0,0,0,.2) 100%); z-index: 1; }
+  .cardB .book::after { content: ''; position: absolute; right: -3px; top: 3px; bottom: 3px; width: 3px; border-radius: 0 2px 2px 0; background: repeating-linear-gradient(180deg, #e8e4d8 0 1px, #cfcabb 1px 2px); box-shadow: 1px 0 0 rgba(0,0,0,.25); }
+  .cardB .body { padding: 12px 14px 10px; }
+  .cardB .head { display: flex; align-items: center; gap: 10px; }
+  .cardB .head .latest { margin-left: auto; }
+  .cardB .strip { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+  .cardB .chip { font-size: 11px; font-weight: 600; letter-spacing: .4px; padding: 3px 8px; border-radius: 6px; border: 1px solid var(--ff-border); background: var(--ff-surface); color: var(--ff-muted); }
+  .cardB .chip.k { color: var(--ff-text); }
+  .cardB .chip.rated { background: var(--ff-glass), var(--ff-accent-grad); color: #fff; border-color: transparent; text-shadow: 0 1px 0 rgba(0,0,0,.2); }
+
+  /* ===== C. Console list entry (dense, clamped) ===== */
+  .listC { border: 1px solid var(--ff-border); border-radius: 10px; overflow: hidden; }
+  .rowC { display: grid; grid-template-columns: 36px 1fr auto; gap: 12px; align-items: center; padding: 10px 12px 10px 14px; position: relative; background: var(--ff-surface); transition: background .12s var(--ease), box-shadow .12s var(--ease); }
+  .rowC + .rowC { border-top: 1px solid var(--ff-border); }
+  .rowC:nth-child(even) { background: color-mix(in srgb, var(--ff-surface-2) 55%, var(--ff-surface)); }
+  .rowC::after { content: '▸'; position: absolute; left: 4px; top: 50%; transform: translate(-4px, -50%); color: var(--ff-accent); font-size: 12px; opacity: 0; transition: opacity .12s var(--ease), transform .12s var(--ease); }
+  .rowC:hover { background: var(--ff-surface-2); box-shadow: inset 3px 0 0 var(--ff-accent); }
+  .rowC:hover::after { opacity: 1; transform: translate(0, -50%); }
+  .rowC .well { width: 36px; height: 36px; border-radius: 8px; background: var(--ff-ring); display: flex; align-items: center; justify-content: center; }
+  .rowC .well .cover { width: 22px; height: 29px; border-radius: 3px; }
+  .rowC .line1 { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+  .rowC .summary { margin: 2px 0 0; font-size: 13px; color: var(--ff-text); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+  .rowC .meta { margin-top: 2px; font-size: 11.5px; }
+  .rowC .side { display: flex; flex-direction: column; align-items: flex-end; gap: 6px; font-size: 11px; color: var(--ff-muted); white-space: nowrap; }
+
+  /* ===== D. Two-up blades ===== */
+  .gridD { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .cardD { display: flex; flex-direction: column; border: 1px solid var(--ff-border); border-radius: 12px; background: var(--ff-surface-2); padding: 12px 14px; position: relative; overflow: hidden; transition: transform .14s var(--ease), box-shadow .18s var(--ease), border-color .15s var(--ease); }
+  .cardD::before { content: ''; position: absolute; left: 0; right: 0; top: 0; height: 3px; background: var(--ff-glass), var(--ff-accent-grad); transform: scaleX(0); transform-origin: left; transition: transform .2s var(--ease); }
+  .cardD:hover { transform: translateY(-2px); border-color: var(--ff-accent); box-shadow: 0 8px 20px rgba(0,0,0,.12); }
+  .cardD:hover::before { transform: scaleX(1); }
+  .cardD .head { display: flex; gap: 12px; align-items: flex-start; }
+  .cardD .head .text { flex: 1; min-width: 0; }
+  .cardD .summary { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; margin-top: 8px; }
+  .cardD .foot { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-top: auto; padding-top: 10px; }
+  .cardD .foot .meta { margin: 0; }
+  @media (max-width: 760px) { .gridD { grid-template-columns: 1fr; } .rowA { grid-template-columns: 50px 1fr; } .rowA .latest { grid-column: 2; justify-self: start; } }
+  footer { display: flex; justify-content: center; gap: 22px; height: 40px; align-items: center; border-top: 1px solid var(--ff-border); background: var(--ff-surface); color: var(--ff-muted); font-size: 12px; }
+</style>
+</head>
+<body>
+<div id="top"><span class="logo">FanFiction</span><small>|</small><span>unleash your imagination</span><div class="right"><button id="theme" type="button">Paper / Slate</button></div></div>
+<main>
+
+  <h2 class="design">Sample B <span>Cartridge card — chosen</span> — a glossy navy spine column holds the cover as a small book; the body ends in a stat strip</h2>
+  <div class="card">
+    <div class="status">2 found:</div>
+    <div id="B"></div>
+    <div class="note"><b>Translation:</b> spine column, book cover (spine strip, page edges, shadow, slight turn) and hover are all doable on the real markup: the cover is an image inside the title link, whose two pseudo-elements become the spine strip and the page edges. <b>The chips remain a mockup liberty:</b> the meta line is one run of text, so in the theme it is one styled line.</div>
+  </div>
+
+  <h2 class="design">Sample A <span>Dossier row</span> — the current row, tidied into a tile: cover, title with the latest-chapter button, summary, one meta line</h2>
+  <div class="card">
+    <div class="status">2 found:</div>
+    <div id="A"></div>
+    <div class="note"><b>Translation:</b> one to one with the real markup. The row is the tile, the chevron link becomes the square button, the summary and meta keep their elements. Nothing is invented.</div>
+  </div>
+
+  <h2 class="design">Sample C <span>Console list entry</span> — dense scanning list: cover in a well, two-line summary, meta tucked right; the menu cursor on hover</h2>
+  <div class="card">
+    <div class="status">2 found:</div>
+    <div class="listC" id="C"></div>
+    <div class="note"><b>Translation:</b> feasible. The right column shows the tail of the meta line ("Updated: Nov 8"), which the site wraps in its own span, so it can be pulled aside. The rest of the meta stays one line under the summary.</div>
+  </div>
+
+  <h2 class="design">Sample D <span>Two-up blades</span> — results as a two-column grid of equal-height cards, three-line summary, meta in the foot</h2>
+  <div class="card">
+    <div class="status">2 found:</div>
+    <div class="gridD" id="D"></div>
+    <div class="note"><b>Translation:</b> feasible with a grid on the results container; the rows become cards. Costs reading width per card and drops to one column under 760 px. Best when results are many.</div>
+  </div>
+
+</main>
+<footer><a href="#">Help</a><a href="#">Cookies</a><a href="#">Privacy</a><a href="#">Terms of Service</a><a href="#">Top</a></footer>
+<script>
+  const stories = [
+    { title: 'Pokemon Mystery Dungeon: Starfall Legacy', author: 'PRG-Central', visited: true,
+      summary: '"Starfall Legacy" follows the last surviving bridge crew of the U.S.S. Sagittarius after their starship is ripped from warp and stranded on an unknown world, transforming them into Pokémon. Mourning the loss of their ship and crewmates, they must adapt to a new reality governed by unfamiliar rules and abilities.',
+      meta: 'Crossover - Pokémon & Star Trek Online - Rated: T - English - Fantasy/Sci-Fi - Chapters: 16 - Words: 101,810 - Reviews: 9 - Favs: 4 - Follows: 7 - Updated: Nov 8 - Published: Jul 14, 2025',
+      chips: ['Crossover','T','English','Fantasy/Sci-Fi','16 ch','101,810 words','9 reviews','4 favs','7 follows'], updated: 'Updated Nov 8', published: 'Published Jul 14, 2025' },
+    { title: 'Star Trek: Ascension', author: 'Asaki Inoue', visited: false,
+      summary: 'It follows the adventures of Sapphire and the crew of the -Lost Lapras- in the Pokemon world.',
+      meta: 'Crossover - Pokémon & Star Trek Online - Rated: T - English - Adventure - Chapters: 1 - Words: 772 - Reviews: 1 - Published: Apr 5, 2015',
+      chips: ['Crossover','T','English','Adventure','1 ch','772 words','1 review'], updated: 'Published Apr 5, 2015', published: '' },
+  ];
+  const cover = () => '<div class="cover"></div>';
+  const title = s => `<a class="title${s.visited ? ' visited' : ''}" href="#">${s.title}</a>`;
+  const by = s => `<span class="by">by <a href="#">${s.author}</a></span> <a class="reviews" href="#">reviews</a>`;
+  const latest = '<a class="latest" href="#" title="Latest chapter">▸</a>';
+  A.innerHTML = stories.map(s => `<div class="rowA">${cover()}<div><div class="head">${title(s)} ${by(s)}</div><div class="summary">${s.summary}</div><div class="meta">${s.meta}</div></div>${latest}</div>`).join('');
+  B.innerHTML = stories.map(s => `<div class="cardB"><div class="spine"><div class="book">${cover()}</div></div><div class="body"><div class="head">${title(s)} ${by(s)} ${latest}</div><div class="summary">${s.summary}</div><div class="strip">${s.chips.map((c,i) => `<span class="chip${i===1?' rated':''}${/words|ch$/.test(c)?' k':''}">${c}</span>`).join('')}<span class="chip">${s.updated}</span></div></div></div>`).join('');
+  C.innerHTML = stories.map(s => `<div class="rowC"><div class="well">${cover()}</div><div><div class="line1">${title(s)} ${by(s)}</div><div class="summary">${s.summary}</div><div class="meta">${s.meta.replace(/ - (Updated|Published):.*$/, '')}</div></div><div class="side"><span>${s.updated}</span>${latest}</div></div>`).join('');
+  D.innerHTML = stories.map(s => `<div class="cardD"><div class="head">${cover()}<div class="text">${title(s)}<div style="margin-top:4px">${by(s)}</div></div>${latest}</div><div class="summary">${s.summary}</div><div class="foot"><div class="meta">${s.meta}</div></div></div>`).join('');
+  theme.onclick = () => document.documentElement.dataset.theme = document.documentElement.dataset.theme === 'slate' ? '' : 'slate';
+</script>
+</body>
+</html>

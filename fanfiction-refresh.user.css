@@ -1,0 +1,3122 @@
+/* ==UserStyle==
+@name           FanFiction.net Refresh
+@namespace      hexfury.ffnet
+@version        0.15.2
+@description    FanFiction.net as a retro game platform with modern touches: paper or slate palette, centred page, launcher home, readable story lists, a proper reading column, console-style controls and motion. Works with the site's own font, width, spacing and contrast buttons. Icons: Silk by Mark James (famfamfam.com), CC BY 2.5, served from the site's own folder.
+@author         Hexfury
+@license        MIT
+@homepageURL    https://github.com/BladefuryDev/fanfiction-refresh
+@supportURL     https://github.com/BladefuryDev/fanfiction-refresh/issues
+@updateURL      https://raw.githubusercontent.com/BladefuryDev/fanfiction-refresh/main/fanfiction-refresh.user.css
+@preprocessor   stylus
+
+@var select   theme      "Colour scheme" {
+  "Paper (light)*": "paper",
+  "Slate (dark)": "slate",
+  "Follow system": "auto"
+}
+@var color    accent     "Accent colour" #2f6fdb
+@var range    pagewidth  "Page width" [1180, 900, 2200, 20, 'px']
+@var range    readwidth  "Reading column width (0 = full)" [820, 0, 1600, 20, 'px']
+@var select   readfont   "Reading font" {
+  "Site setting*": "site",
+  "Georgia": "georgia",
+  "Segoe UI": "segoe",
+  "System": "systemui",
+  "Verdana": "verdana"
+}
+@var range    readsize   "Reading font size (0 = site setting)" [0, 0, 32, 1, 'px']
+@var range    readlh     "Reading line height (0 = site setting)" [1.6, 0, 2.2, 0.05]
+@var checkbox gloss      "2000s gloss on the blue surfaces" 1
+@var checkbox stickymenu "Keep the menu bar in view" 1
+@var checkbox motion     "Console-style motion (outside the reader)" 1
+@var checkbox hideads    "Hide in-page ad slots too" 1
+@var checkbox tweets     "Show the FictionPress tweets box on the home page" 0
+@var checkbox allowselect "Allow selecting story text" 0
+==/UserStyle== */
+
+@-moz-document domain("fanfiction.net") {
+
+  /* ================================================================== */
+  /* PALETTE — the one place to change colours.                          */
+  /* Two schemes, Paper and Slate. Everything below reads the --ff-*     */
+  /* custom properties built from these. `accent` comes from the Stylus  */
+  /* setting; the gloss gradients are derived from it further down.      */
+  /* ================================================================== */
+
+  // (Stylus keeps /* */ comments that sit on a value line, so these use //.)
+  // Paper (light)
+  paper-bg        = #ecebe4   // page background
+  paper-surface   = #fbfaf7   // cards, menu bar, footer
+  paper-surface-2 = #f1efe8   // tiles, wells, hover fills, modal footers
+  paper-input     = #ffffff   // text fields
+  paper-text      = #1f2328
+  paper-muted     = #6b7280   // meta text, labels
+  paper-border    = #dcd8ce
+  paper-visited   = #7a4fb5   // visited story titles
+  paper-reviews   = #c2410c   // "reviews" links
+  paper-shadow    = 0 1px 2px rgba(0, 0, 0, 0.06)
+
+  // Slate (dark)
+  slate-bg        = #15171c
+  slate-surface   = #1e2128
+  slate-surface-2 = #272b34
+  slate-input     = #14161b
+  slate-text      = #d9dde4
+  slate-muted     = #8c94a3
+  slate-border    = #343944
+  slate-visited   = #b79cf0
+  slate-reviews   = #f0956a
+  slate-shadow    = 0 1px 2px rgba(0, 0, 0, 0.4)
+
+  // Everything blue follows the Accent setting (user, 2026-11-12). The
+  // title bar is a deep shade on the accent's own hue (an earlier 18deg
+  // nudge towards indigo kept the original navy but read as purple next
+  // to a blue accent, so it went); its saturation scales with the
+  // accent's, so a grey accent gives a grey bar. The tagline rainbow
+  // starts at the accent and walks round the wheel. The hsl() lightness
+  // and saturation stops are the original navy's, so the default now
+  // gives #263b5e instead of #262a5e.
+  bar-hue         = round(hue(accent))
+  bar-sat         = saturation(accent) * 0.6       // 71% default -> 42%
+  paper-top       = hsl(bar-hue, bar-sat, 26%)             // #262a5e
+  paper-top-hi    = hsl(bar-hue, bar-sat * 0.95, 34%)     // #343a7a
+  paper-top-lo    = hsl(bar-hue, bar-sat * 1.07, 19%)     // #1b1e48
+  slate-top       = hsl(bar-hue, bar-sat * 0.76, 9%)      // #10121f
+  slate-top-hi    = hsl(bar-hue, bar-sat * 0.79, 16%)     // #1c2038
+  slate-top-lo    = hsl(bar-hue, bar-sat, 6%)             // #090b16
+  rainbow-2       = hsl(round(hue(accent) + 108deg), 71%, 58%)   // #e0479e
+  rainbow-3       = hsl(round(hue(accent) + 181deg), 90%, 61%)   // #f5b640
+
+  // Shared
+  link-lift       = 22%       // how much lighter links go on Slate
+  rainbow         = '' + accent + ', ' + rainbow-2 + ', ' + rainbow-3   // the tagline underline
+  ring            = rgba(accent, 0.28)            // focus rings, icon wells
+
+  /* Mid-2000s gloss: lighter top fading darker, a hairline highlight on
+     the top edge, and the half-height glass band. Flat when gloss is off. */
+  /* The selection gloss sits on a darkened accent so a bright accent does
+     not float above the deep title bar (user, 2026-11-12: with a vivid
+     green the active row glowed while the bar stayed dark). Links, markers
+     and rings keep the accent itself. darken() scales lightness: 15% takes
+     the default blue from 52% to 44%. */
+  accent-mid = darken(accent, 15%)
+  accent-hi = lighten(accent-mid, 16%)
+  accent-lo = darken(accent-mid, 14%)
+  if gloss {
+    accent-grad = 'linear-gradient(180deg, ' + accent-hi + ' 0%, ' + accent-mid + ' 55%, ' + accent-lo + ' 100%)'
+    glass = 'linear-gradient(180deg, rgba(255,255,255,0.16) 0%, rgba(255,255,255,0.05) 50%, rgba(255,255,255,0) 50.5%)'
+    top-grad-light = 'linear-gradient(180deg, ' + paper-top-hi + ' 0%, ' + paper-top + ' 60%, ' + paper-top-lo + ' 100%)'
+    top-grad-dark = 'linear-gradient(180deg, ' + slate-top-hi + ' 0%, ' + slate-top + ' 60%, ' + slate-top-lo + ' 100%)'
+    edge-hi = 'inset 0 1px 0 rgba(255,255,255,0.18)'
+  } else {
+    accent-grad = 'linear-gradient(' + accent-mid + ', ' + accent-mid + ')'
+    glass = 'linear-gradient(rgba(0,0,0,0), rgba(0,0,0,0))'
+    top-grad-light = 'linear-gradient(' + paper-top + ', ' + paper-top + ')'
+    top-grad-dark = 'linear-gradient(' + slate-top + ', ' + slate-top + ')'
+    edge-hi = 'none'
+  }
+
+  /* The palette above becomes custom properties here; nothing below this
+     point names a raw colour except pure white/black overlays. */
+  light-vars() {
+    --ff-bg: paper-bg;
+    --ff-surface: paper-surface;
+    --ff-surface-2: paper-surface-2;
+    --ff-input: paper-input;
+    --ff-text: paper-text;
+    --ff-muted: paper-muted;
+    --ff-border: paper-border;
+    --ff-link: accent;
+    --ff-visited: paper-visited;
+    --ff-reviews: paper-reviews;
+    --ff-top: paper-top;
+    --ff-top-grad: unquote(top-grad-light);
+    --ff-accent: accent;
+    --ff-accent-hi: accent-hi;
+    --ff-accent-grad: unquote(accent-grad);
+    --ff-glass: unquote(glass);
+    --ff-edge-hi: unquote(edge-hi);
+    --ff-ring: ring;
+    --ff-rainbow: unquote(rainbow);
+    --ff-shadow: paper-shadow;
+    color-scheme: light;
+  }
+
+  dark-vars() {
+    --ff-bg: slate-bg;
+    --ff-surface: slate-surface;
+    --ff-surface-2: slate-surface-2;
+    --ff-input: slate-input;
+    --ff-text: slate-text;
+    --ff-muted: slate-muted;
+    --ff-border: slate-border;
+    --ff-link: lighten(accent, link-lift);
+    --ff-visited: slate-visited;
+    --ff-reviews: slate-reviews;
+    --ff-top: slate-top;
+    --ff-top-grad: unquote(top-grad-dark);
+    --ff-accent: accent;
+    --ff-accent-hi: accent-hi;
+    --ff-accent-grad: unquote(accent-grad);
+    --ff-glass: unquote(glass);
+    --ff-edge-hi: unquote(edge-hi);
+    --ff-ring: ring;
+    --ff-rainbow: unquote(rainbow);
+    --ff-shadow: slate-shadow;
+    color-scheme: dark;
+  }
+
+  /* Scheme names avoid `light` and `dark`, which are Stylus-language
+     colour functions and would make the comparison silently wrong. */
+  if theme == paper {
+    :root {
+      light-vars();
+    }
+  }
+  if theme == slate {
+    :root {
+      dark-vars();
+    }
+  }
+  if theme == auto {
+    :root {
+      light-vars();
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        dark-vars();
+      }
+    }
+  }
+
+  /* The site's own Story Contrast button adds .xlight to the story text
+     (and remembers it in its cookie). The palette overrides its inline
+     colours, so the button would do nothing; instead it switches the page
+     to Slate while the story is marked dark. A no-op when Slate is on. */
+  :root:has(#storytext.xlight) {
+    dark-vars();
+  }
+
+  /* ------------------------------------------------------------------ */
+  /* Page frame                                                          */
+  /* ------------------------------------------------------------------ */
+
+  html, body {
+    background: var(--ff-bg) !important;
+    color: var(--ff-text) !important;
+  }
+  body {
+    min-width: 0 !important;
+    font-size: 14px !important;
+  }
+  /* The site pins .maxwidth to 975px (and 700px on phones) from inline
+     styles; this makes it fluid up to the chosen page width. */
+  .maxwidth {
+    width: auto !important;
+    min-width: 0 !important;
+    max-width: pagewidth !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+  }
+  a { color: var(--ff-link); }
+  a:hover { text-decoration: underline; }
+  hr {
+    border: 0 !important;
+    border-top: 1px solid var(--ff-border) !important;
+    margin: 14px 0 !important;
+  }
+
+  /* ------------------------------------------------------------------ */
+  /* Top bar (logo, login) and the menu bar                              */
+  /* ------------------------------------------------------------------ */
+
+  #top {
+    background: var(--ff-glass), var(--ff-top-grad) !important;
+    box-shadow: var(--ff-edge-hi);
+  }
+  /* The tagline "unleash your imagination" is a bare text node, which CSS
+     cannot style. So the bar's font-size is zeroed (hiding the node),
+     every real child gets its size back, and the separator's ::after
+     re-renders the tagline as a box that can take a hover underline. */
+  #top .menulink {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 16px !important;
+    font-size: 0;
+    letter-spacing: 0.2px !important;
+    cursor: default;
+    user-select: none;
+  }
+  #top .menulink a, #top .menulink span[onclick] { cursor: pointer; }
+  #top .menulink > a:first-of-type {
+    font-weight: 700;
+    font-size: 17px !important; /* inline style says 1.1em, of the zeroed bar */
+  }
+  #top .menulink > a:first-of-type:hover {
+    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.55);
+    text-decoration: none !important;
+  }
+  #top .menulink small {
+    font-size: 15px;
+    color: rgba(255, 255, 255, 0.6);
+  }
+  #top .menulink small::after {
+    content: 'unleash your imagination';
+    margin-left: 8px;
+    padding-bottom: 2px;
+    color: #fff;
+    letter-spacing: 0.2px;
+    /* the underline: a gradient drawn at zero width until hovered. Only
+       the width transitions; the anchor flips instantly, so it grows in
+       from the left and shrinks away to the right. */
+    background-image: linear-gradient(90deg, var(--ff-rainbow));
+    background-repeat: no-repeat;
+    background-size: 0% 2px;
+    background-position: 100% 100%;
+  }
+  #top .menulink small:hover::after {
+    background-size: 100% 2px;
+    background-position: 0 100%;
+  }
+  #top .menulink a { color: #fff !important; }
+  #top #name_login { font-size: 13px; }
+  /* The mobile-edition toggle goes: the theme makes the site responsive. */
+  #top .menulink > span.icon-kub-mobile { display: none !important; }
+  /* Fontastic Panel (UI font) button: a real icon button */
+  #top .menulink > span.icon-tl-text {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
+    margin-left: 2px !important;
+    border-radius: 8px;
+    font-size: 15px !important;
+    color: #fff;
+    cursor: pointer;
+  }
+  #top .menulink > span.icon-tl-text:hover {
+    background: rgba(255, 255, 255, 0.16);
+  }
+  /* The login span comes first in the markup; order moves it to the end. */
+  #top #name_login {
+    order: 10;
+    margin-left: auto;
+    float: none !important;
+    display: flex;
+    gap: 6px;
+  }
+  #top #name_login a {
+    padding: 4px 10px;
+    border-radius: 6px;
+    background: rgba(255, 255, 255, 0.12);
+    font-size: 13px;
+  }
+  #top #name_login a:hover {
+    background: rgba(255, 255, 255, 0.22);
+    text-decoration: none !important;
+  }
+
+  .zmenu {
+    background: var(--ff-surface) !important;
+    border-bottom: 1px solid var(--ff-border) !important;
+    padding: 0 !important;
+  }
+  if stickymenu {
+    .zmenu:has(> #zmenu) {
+      position: sticky;
+      top: 0;
+      z-index: 60;
+      box-shadow: var(--ff-shadow);
+    }
+  }
+  #zmenu {
+    padding: 6px 10px !important;
+  }
+  .zui {
+    background: transparent !important;
+    letter-spacing: 0 !important;
+  }
+
+  /* The menu is a two-cell table (dropdowns | search). Flatten it into a
+     centred flex row; the cells become flex groups. */
+  #zmenu table.maxwidth {
+    display: flex !important;
+    width: auto !important;
+    justify-content: center;
+    align-items: center;
+    gap: 18px;
+    margin: 0 auto !important;
+  }
+  #zmenu tbody, #zmenu tr {
+    display: contents !important;
+  }
+  #zmenu td {
+    display: flex !important;
+    align-items: center;
+    gap: 4px;
+    padding: 0 !important;
+    vertical-align: middle;
+  }
+  .xmenu_item {
+    display: inline-flex !important;
+    padding: 0 !important;
+  }
+
+  /* Menu buttons: 34px tall to match the search group and .btn */
+  .zui .xmenu_item > a.dropdown-toggle {
+    display: inline-flex !important;
+    align-items: center;
+    gap: 7px;
+    height: 34px;
+    box-sizing: border-box;
+    padding: 0 12px !important;
+    border-radius: 8px;
+    border: 1px solid transparent;
+    color: var(--ff-text) !important;
+    font-weight: 500;
+    line-height: 1 !important;
+    text-decoration: none !important;
+  }
+  .zui .xmenu_item > a.dropdown-toggle:hover {
+    background: var(--ff-surface-2);
+    border-color: var(--ff-border);
+    text-decoration: none !important;
+  }
+  .zui .xmenu_item.open > a.dropdown-toggle {
+    background: var(--ff-glass), var(--ff-accent-grad) !important;
+    border-color: transparent;
+    color: #fff !important;
+    text-shadow: 0 1px 0 rgba(0, 0, 0, 0.2);
+  }
+  .zui .xmenu_item > a.dropdown-toggle .caret {
+    border-top-color: currentColor !important;
+    opacity: 0.6;
+    margin: 0 !important;
+    vertical-align: middle !important;
+  }
+
+  /* Search: the Story dropdown button and the field, as one 34px group */
+  #search_form {
+    margin: 0 !important;
+    float: none !important;
+  }
+  #search_form .input-prepend {
+    display: inline-flex !important;
+    align-items: stretch;
+    height: 34px;
+    margin: 0 !important;
+    font-size: 13px !important;
+  }
+  #search_form .btn-group {
+    display: flex;
+    align-items: stretch;
+  }
+  #search_form .btn-group > button.btn {
+    height: 34px !important;
+    box-sizing: border-box;
+    padding: 0 10px 0 12px !important;
+    border-radius: 8px 0 0 8px !important;
+    border-right: 0 !important;
+    display: inline-flex !important;
+    align-items: center;
+    gap: 7px;
+    font-weight: 500;
+  }
+  #search_form #search_keywords {
+    height: 34px !important;
+    box-sizing: border-box !important;
+    width: 200px !important;
+    margin: 0 !important;
+    padding: 0 12px !important;
+    border-radius: 0 8px 8px 0 !important;
+    font-size: 13px !important;
+    line-height: 32px !important;
+  }
+  #search_form #search_keywords:focus {
+    width: 260px !important;
+  }
+  #search_form .dropdown-menu {
+    margin-top: 6px !important;
+  }
+
+  /* ------------------------------------------------------------------ */
+  /* Content card                                                        */
+  /* ------------------------------------------------------------------ */
+
+  #content_parent, .xcontrast_outer {
+    background: var(--ff-bg) !important;
+    padding: 16px 0 !important;
+  }
+  #content_wrapper, .xcontrast {
+    background: var(--ff-surface) !important;
+    border: 1px solid var(--ff-border);
+    border-radius: 10px;
+    box-shadow: var(--ff-shadow);
+  }
+  #content_wrapper_inner {
+    border: 0 !important;
+    padding: 18px 22px !important;
+    background: transparent !important;
+  }
+  .xcontrast_txt, .xcontrast_txt.xlight {
+    color: var(--ff-text) !important;
+  }
+  a.xcontrast_txt, a.xcontrast_txt.xlight {
+    color: var(--ff-link) !important;
+  }
+  .xgray, .gray, .xgray.xcontrast_txt {
+    color: var(--ff-muted) !important;
+  }
+  .xicon-section-arrow { color: var(--ff-muted) !important; }
+
+  /* Filters button sits on its own centred line */
+  #content_wrapper_inner > center { margin: 6px 0 10px; }
+
+  /* ------------------------------------------------------------------ */
+  /* Story lists (category pages, search, profiles)                      */
+  /* ------------------------------------------------------------------ */
+
+  /* The cartridge card. Row markup: a.stitle (holds the floated cover
+     image and the title) ; a > .icon-chevron-right (latest chapter) ;
+     "by" a (author) ; a.reviews ; div.z-indent (summary) > div.z-padtop2
+     (meta line). The navy spine column is the row's own background; the
+     cover is pulled out as a small book: the image gets the page edges
+     as stacked box shadows, the title link's ::before is the spine strip,
+     both turned about the same left axis. Rows without a cover get a
+     blank book from the row's ::before. */
+  /* Book geometry. The spine strip sits to the LEFT of the cover art so
+     the whole face stays visible. The card's left padding is 112px and
+     the book (spine 8 + cover 68 = 76px) is centred in it: 18px clear
+     on each side. The book lies flat: no turn and no page edges (user,
+     2026-11-12); only the cover and the mirrored spine remain. */
+  spine-w  = 96px
+  book-w   = 68px
+  book-h   = 92px
+  spine-x  = 18px
+  cover-x  = 26px
+  book-turn = 'translateY(-50%)'
+
+  .z-list {
+    position: relative;
+    box-sizing: border-box;
+    min-height: 118px !important;
+    margin: 0 0 10px !important;
+    padding: 12px 14px 12px (spine-w + 16px) !important;
+    border: 1px solid var(--ff-border) !important;
+    border-radius: 12px;
+    background-color: var(--ff-surface-2);
+    background-image: none;   /* no column behind the book (user, 2026-11-12) */
+    line-height: 1.45;
+    overflow: hidden;
+  }
+  .z-list:last-of-type { margin-bottom: 0 !important; }
+  /* Hover. The site paints its own gradient on `div > .zhover:hover` (the
+     background shorthand, which would wipe the spine column) and its
+     listing script adds `.z-list_hover { height: 115px }`, which would
+     clip the meta line. Both are overridden here. */
+  div > .zhover:hover,
+  .z-list:hover,
+  .z-list.z-list_hover {
+    height: auto !important;
+    border-color: var(--ff-accent) !important;
+    background-color: var(--ff-surface-2) !important;
+    background-image: none !important;  /* the site paints a hover gradient */
+  }
+
+  /* the book */
+  .z-list img.cimage {
+    position: absolute !important;
+    left: cover-x;
+    top: 50%;
+    width: book-w !important;
+    height: book-h !important;
+    float: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+    border-radius: 0 5px 5px 0 !important;
+    object-fit: cover;
+    object-position: center;
+    transform: unquote(book-turn);
+    box-shadow: 4px 4px 7px rgba(0, 0, 0, 0.38),
+                inset 0 0 0 1px rgba(255, 255, 255, 0.12);
+    /* The spine shows a mirrored slice of the cover: a box reflection on
+       the left, masked to the 8px nearest the cover. The mask is drawn in
+       the element's own coordinates and mirrored with it, so "the cover's
+       left 8px" is what ends up next to the cover. Chromium only; Firefox
+       shows the fold shading over the column instead. */
+    -webkit-box-reflect: left 0 linear-gradient(to right, #000 8px, transparent 8px);
+    z-index: 1;
+  }
+  .z-list:has(> .stitle > img.cimage) > .stitle::before,
+  .z-list:has(> img.cimage)::before {
+    content: '';
+    position: absolute;
+    left: spine-x;
+    top: 50%;
+    width: 8px;
+    height: book-h;
+    border-radius: 2px 0 0 2px;
+    /* fold shading over the mirrored slice; also the whole spine in Firefox */
+    background: linear-gradient(90deg, rgba(0, 0, 0, 0.55) 0%, rgba(0, 0, 0, 0.28) 55%, rgba(255, 255, 255, 0.16) 80%, rgba(0, 0, 0, 0.22) 100%);
+    box-shadow: 5px 5px 7px rgba(0, 0, 0, 0.42);
+    transform-origin: left center;
+    transform: unquote(book-turn);
+    z-index: 2;
+    pointer-events: none;
+  }
+  .z-list:not(:has(img.cimage))::before {
+    content: '';
+    position: absolute;
+    left: spine-x;
+    top: 50%;
+    width: (book-w + 8px);
+    height: book-h;
+    border-radius: 2px 5px 5px 2px;
+    background: linear-gradient(160deg, var(--ff-surface) 0%, var(--ff-surface-2) 100%);
+    transform: unquote(book-turn);
+    box-shadow: 4px 4px 7px rgba(0, 0, 0, 0.38),
+                inset 8px 0 0 rgba(0, 0, 0, 0.25);
+  }
+
+  /* head line: title, latest-chapter button, author, reviews */
+  a.stitle, .novtitle, .z-list > a.l-title {
+    font-size: 15px !important;
+    font-weight: 600;
+    line-height: 1.3;
+    border-bottom: 0 !important;
+    color: var(--ff-link) !important;
+  }
+  .stitle:visited, .yesv:visited {
+    color: var(--ff-visited) !important;
+  }
+  .z-list > a:has(> .icon-chevron-right) {
+    float: right;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    margin: -2px 0 0 10px;
+    border-radius: 8px;
+    border: 1px solid var(--ff-border);
+    background: var(--ff-surface);
+    color: var(--ff-accent);
+    text-decoration: none !important;
+  }
+  .z-list > a:has(> .icon-chevron-right):hover {
+    border-color: var(--ff-accent);
+  }
+  .z-list > a:has(> .icon-chevron-right) .xicon-section-arrow {
+    color: var(--ff-accent) !important;
+    font-size: 11px !important;
+  }
+  .z-list > a:not(.stitle):not(.reviews):not(:has(> .icon-chevron-right)) {
+    font-weight: 500;
+  }
+  /* The "reviews" link leaves the head line and sits in the stat strip,
+     bottom right, next to the counts. (The "Reviews: N" there is plain
+     text in listings; only the story page links the number.) */
+  .z-list > a.reviews {
+    position: absolute;
+    right: 14px;
+    bottom: 12px;
+    padding: 4px 10px;
+    border-radius: 6px;
+    border: 1px solid var(--ff-border);
+    background: var(--ff-surface);
+    color: var(--ff-reviews) !important;
+    font-size: 11px !important;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    text-decoration: none !important;
+  }
+  .z-list > a.reviews:hover {
+    border-color: var(--ff-reviews);
+  }
+  .z-list .z-padtop2.xgray { padding-right: 110px !important; }
+
+  /* summary and the meta line as the stat strip */
+  .z-indent {
+    padding-left: 0 !important;
+    margin-top: 6px;
+    line-height: 1.5;
+  }
+  .z-padtop2.xgray {
+    margin-top: 8px;
+    padding-top: 8px !important;
+    border-top: 1px dashed var(--ff-border);
+    font-size: 12px !important;
+    line-height: 1.7;
+  }
+  .z-padtop2.xgray span { color: var(--ff-text); }
+
+  @media (max-width: 600px) {
+    .z-list { padding-left: 14px !important; }
+    .z-list img.cimage, .z-list > .stitle::before, .z-list::before { display: none !important; }
+  }
+  .reviews, a.reviews, a.visited.reviews {
+    color: var(--ff-reviews) !important;
+    font-style: normal !important;
+    font-size: 12px;
+  }
+
+  /* ------------------------------------------------------------------ */
+  /* Story page. Markup: #pre_story_links.lc-wrapper (breadcrumb) ;      */
+  /* #profile_top (span[onclick] > img.cimage ; button.btn.icon-heart    */
+  /* Follow/Fav ; b title ; span "By:" a author span.icon-mail-1 a PM ;  */
+  /* div summary ; span.xgray meta) ; .lc-wrapper > .lc reader toolbar   */
+  /* (spans with onclick, hidden #f_width / #f_size sub-rows) ; span     */
+  /* [float:right] > button Prev, select#chap_select, button Next ;      */
+  /* #storytextp ; the same chapter row in a right-aligned div ; #review */
+  /* ; .lc-wrapper > .lc with Actions / Share / Follow dropups.          */
+  /* ------------------------------------------------------------------ */
+
+  reader = '#content_wrapper_inner:has(> #storytextp)'
+
+  /* breadcrumb and the three .lc rows: no rule line, no white mask */
+  {reader} .lc-wrapper::after { display: none; }
+  {reader} .lc, {reader} .lc-left, {reader} .lc-right {
+    background: transparent !important;
+    padding: 0 !important;
+  }
+  {reader} > #pre_story_links {
+    margin: 0 0 12px !important;
+    font-size: 12px;
+  }
+  {reader} > #pre_story_links img { vertical-align: -3px; margin-right: 4px; }
+  {reader} > #pre_story_links a { color: var(--ff-muted) !important; font-weight: 500; }
+  {reader} > #pre_story_links a:hover { color: var(--ff-link) !important; }
+
+  /* header: the cartridge, with the cover as the book */
+  {reader} > #profile_top {
+    position: relative;
+    box-sizing: border-box;
+    min-height: 168px !important;
+    margin: 0 0 14px;
+    padding: 16px 16px 14px (spine-w + 44px) !important;
+    border: 1px solid var(--ff-border);
+    border-radius: 12px;
+    background-color: var(--ff-surface-2);
+    background-image: var(--ff-glass), var(--ff-top-grad);
+    background-size: (spine-w + 24px) 100%, (spine-w + 24px) 100%;
+    background-repeat: no-repeat;
+    overflow: hidden;
+  }
+  /* The cover's span becomes the spine column itself: it fills the card's
+     full height and centres the book with flex, so the book no longer
+     depends on resolving a percentage against the card. The spine strip
+     is the span's ::before, positioned inside the same column. */
+  {reader} > #profile_top > span:has(> img.cimage) {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    width: (spine-w + 24px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding-left: 8px;       /* the mirrored spine (8px) hangs left of the image; this centres the pair */
+    box-sizing: border-box;
+    cursor: pointer;
+  }
+  {reader} > #profile_top img.cimage {
+    position: static !important;
+    width: 84px !important;
+    height: 112px !important;
+    float: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+    border-radius: 0 5px 5px 0 !important;
+    object-fit: cover;
+    box-shadow: 4px 4px 7px rgba(0, 0, 0, 0.38),
+                inset 0 0 0 1px rgba(255, 255, 255, 0.12);
+    -webkit-box-reflect: left 0 linear-gradient(to right, #000 8px, transparent 8px);
+    z-index: 1;
+  }
+  {reader} > #profile_top > span:has(> img.cimage)::before {
+    content: '';
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    width: 8px;
+    height: 112px;
+    border-radius: 2px 0 0 2px;
+    background: linear-gradient(90deg, rgba(0, 0, 0, 0.55) 0%, rgba(0, 0, 0, 0.28) 55%, rgba(255, 255, 255, 0.16) 80%, rgba(0, 0, 0, 0.22) 100%);
+    box-shadow: 5px 5px 7px rgba(0, 0, 0, 0.42);
+    transform-origin: left center;
+    transform: unquote(book-turn);
+    z-index: 2;
+    pointer-events: none;
+  }
+  {reader} > #profile_top > button.btn.icon-heart {
+    position: absolute;
+    top: 14px;
+    right: 14px;
+    float: none !important;
+    background: var(--ff-glass), var(--ff-accent-grad) !important;
+    border-color: transparent !important;
+    color: #fff !important;
+    font-weight: 600;
+    text-shadow: 0 1px 0 rgba(0, 0, 0, 0.2);
+    box-shadow: var(--ff-edge-hi) !important;
+  }
+  {reader} > #profile_top > b.xcontrast_txt {
+    display: block;
+    margin: 2px 150px 6px 0;
+    font-size: 22px !important;
+    font-weight: 700;
+    line-height: 1.25;
+  }
+  {reader} > #profile_top > span.xcontrast_txt:not(.xgray),
+  {reader} > #profile_top > a.xcontrast_txt,
+  {reader} > #profile_top > span.icon-mail-1 {
+    font-size: 13px;
+    color: var(--ff-muted) !important;
+  }
+  {reader} > #profile_top > a.xcontrast_txt {
+    color: var(--ff-link) !important;
+    font-weight: 600;
+  }
+  {reader} > #profile_top > div.xcontrast_txt {
+    margin-top: 8px !important;
+    font-size: 14px;
+    line-height: 1.55;
+  }
+  {reader} > #profile_top > span.xgray {
+    display: block;
+    margin-top: 10px;
+    padding-top: 8px;
+    border-top: 1px dashed var(--ff-border);
+    font-size: 12px !important;
+    line-height: 1.7;
+  }
+  {reader} > #profile_top > span.xgray a { color: var(--ff-link) !important; }
+
+  /* reader toolbar: a row of console icon buttons */
+  {reader} > .lc-wrapper:has(.icon-tl-contrast) { margin: 0 0 12px !important; }
+  {reader} > .lc-wrapper:has(.icon-tl-contrast) > .lc {
+    display: flex !important;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    gap: 6px;
+    font-size: 0;
+  }
+  {reader} > .lc-wrapper:has(.icon-tl-contrast) > .lc > span {
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    min-width: 36px;
+    height: 36px;
+    padding: 0 10px !important;
+    border-radius: 8px;
+    border: 1px solid var(--ff-border);
+    background: var(--ff-surface);
+    color: var(--ff-text) !important;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+  }
+  {reader} > .lc-wrapper:has(.icon-tl-contrast) > .lc > span > span {
+    font-size: 14px !important;
+    cursor: pointer;
+  }
+  {reader} > .lc-wrapper:has(.icon-tl-contrast) > .lc > span:hover {
+    border-color: var(--ff-accent);
+    background: var(--ff-surface-2);
+  }
+  /* the sub-rows start with the site's .hide class and no inline display;
+     the site's script then writes an inline display to open and close
+     them. The button rule above must not override either state. */
+  {reader} > .lc-wrapper:has(.icon-tl-contrast) > .lc > span.hide:not([style*="display"]),
+  {reader} > .lc-wrapper:has(.icon-tl-contrast) > .lc > span[style*="display: none"] {
+    display: none !important;
+  }
+  /* the width and spacing sub-rows, when open: chips inside the row */
+  {reader} > .lc-wrapper:has(.icon-tl-contrast) > .lc > #f_width,
+  {reader} > .lc-wrapper:has(.icon-tl-contrast) > .lc > #f_size {
+    padding: 0 4px !important;
+    gap: 4px;
+    border-style: dashed;
+    cursor: default;
+  }
+  {reader} > .lc-wrapper:has(.icon-tl-contrast) > .lc > #f_width > span,
+  {reader} > .lc-wrapper:has(.icon-tl-contrast) > .lc > #f_size > span {
+    display: inline-flex;
+    align-items: center;
+    height: 26px;
+    padding: 0 8px !important;
+    border-radius: 6px;
+    font-size: 12px !important;
+    font-weight: 600;
+    color: var(--ff-text);
+  }
+  {reader} > .lc-wrapper:has(.icon-tl-contrast) > .lc > #f_width > span:hover,
+  {reader} > .lc-wrapper:has(.icon-tl-contrast) > .lc > #f_size > span:hover {
+    background: var(--ff-glass), var(--ff-accent-grad);
+    color: #fff;
+  }
+
+  /* chapter selector: [< Prev][ chapter v ][Next >] as one joined control,
+     centred, above and below the text */
+  {reader} > span:has(> #chap_select),
+  {reader} > div:has(> #chap_select) {
+    float: none !important;
+    display: flex !important;
+    justify-content: center;
+    align-items: stretch;
+    margin: 6px 0 10px;
+    text-align: left !important;
+    font-size: 0;
+  }
+  {reader} > span:has(> #chap_select) > .btn,
+  {reader} > div:has(> #chap_select) > .btn {
+    height: 38px !important;
+    box-sizing: border-box;
+    display: inline-flex !important;
+    align-items: center;
+    padding: 0 14px !important;
+    font-size: 13px !important;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+  {reader} > span:has(> #chap_select) > .btn:first-child,
+  {reader} > div:has(> #chap_select) > .btn:first-child {
+    border-radius: 8px 0 0 8px !important;
+    border-right: 0 !important;
+  }
+  {reader} > span:has(> #chap_select) > .btn:last-child,
+  {reader} > div:has(> #chap_select) > .btn:last-child {
+    border-radius: 0 8px 8px 0 !important;
+    border-left: 0 !important;
+  }
+  {reader} #chap_select {
+    height: 38px !important;
+    box-sizing: border-box;
+    min-width: 320px;
+    max-width: 60vw;
+    margin: 0 !important;
+    padding: 0 36px 0 14px !important;
+    border-radius: 0 !important;
+    font-size: 14px !important;
+    font-weight: 600;
+    text-align: center;
+    text-align-last: center;
+    background-color: var(--ff-surface-2) !important;
+  }
+  {reader} #chap_select:first-child { border-radius: 8px 0 0 8px !important; }
+  {reader} #chap_select:last-child { border-radius: 0 8px 8px 0 !important; }
+  {reader} #chap_select:hover { border-color: var(--ff-accent) !important; }
+
+  /* review: a card; the empty 336px spacer cell goes */
+  {reader} > #review {
+    margin: 18px 0 !important;
+    padding: 16px !important;
+    border: 1px solid var(--ff-border);
+    border-radius: 12px;
+    background: var(--ff-surface-2);
+  }
+  {reader} > #review > table > tbody > tr > td:first-child:not(:has(*)),
+  {reader} > #review > table > tbody > tr > td[width="10"] {
+    display: none;
+  }
+  {reader} > #review td { padding: 2px !important; border: 0 !important; }
+  {reader} > #review td[valign="top"] > div { margin: 0 auto; }
+  {reader} > #review textarea {
+    min-height: 110px;
+    line-height: 1.5 !important;
+  }
+
+  /* actions row at the foot: centred buttons */
+  {reader} > .lc-wrapper:has(#story_actions) { margin: 6px 0 0 !important; }
+  {reader} > .lc-wrapper:has(#story_actions) table { margin: 0 auto; }
+  {reader} > .lc-wrapper:has(#story_actions) td { padding: 4px !important; border: 0 !important; }
+
+  @media (max-width: 700px) {
+    {reader} > #profile_top { padding-left: 16px !important; background-image: none; min-height: 0 !important; }
+    {reader} > #profile_top > span:has(> img.cimage) { display: none !important; }
+    {reader} > #profile_top > b.xcontrast_txt { margin-right: 0; padding-right: 130px; }
+    {reader} #chap_select { min-width: 0; flex: 1 1 auto; }
+  }
+
+  /* ------------------------------------------------------------------ */
+  /* Reader                                                              */
+  /* ------------------------------------------------------------------ */
+
+  .storytextp {
+    padding: 8px 0 !important;
+  }
+  #storytext {
+    color: var(--ff-text) !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+    text-align: left;
+  }
+  if readwidth > 0 {
+    #storytext { max-width: readwidth !important; }
+  }
+  /* Font stacks are mapped here from short keys so the select works
+     whether Stylus hands the value over bare or quoted. */
+  if readfont == georgia {
+    #storytext { font-family: Georgia, 'Times New Roman', serif !important; }
+  }
+  if readfont == segoe {
+    #storytext { font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif !important; }
+  }
+  if readfont == systemui {
+    #storytext { font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif !important; }
+  }
+  if readfont == verdana {
+    #storytext { font-family: Verdana, Geneva, sans-serif !important; }
+  }
+  if readsize > 0 {
+    #storytext { font-size: readsize !important; }
+  }
+  if readlh > 0 {
+    #storytext { line-height: readlh !important; }
+  }
+  #storytext p {
+    margin: 0 0 1em !important;
+  }
+  #storytext hr {
+    width: 40%;
+    margin: 1.6em auto !important;
+  }
+  if allowselect {
+    #storytextp, #storytext, .nocopy {
+      user-select: text !important;
+      -webkit-user-select: text !important;
+    }
+  }
+
+  /* ------------------------------------------------------------------ */
+  /* Controls: buttons, inputs, selects, dropdowns, modals               */
+  /* ------------------------------------------------------------------ */
+
+  .btn {
+    background: var(--ff-surface) !important;
+    background-image: none !important;
+    border: 1px solid var(--ff-border) !important;
+    color: var(--ff-text) !important;
+    border-radius: 8px !important;
+    box-shadow: none !important;
+    text-shadow: none !important;
+    padding: 6px 12px !important;
+    line-height: 20px !important;
+  }
+  .btn:hover, .btn:focus, .btn.active, .btn:active {
+    background: var(--ff-surface-2) !important;
+    color: var(--ff-text) !important;
+  }
+  .btn-primary, .btn-primary:hover, .btn-primary:focus {
+    background: var(--ff-glass), var(--ff-accent-grad) !important;
+    border-color: transparent !important;
+    color: #fff !important;
+    text-shadow: 0 1px 0 rgba(0, 0, 0, 0.2) !important;
+    box-shadow: var(--ff-edge-hi) !important;
+  }
+  .btn-primary:hover { filter: brightness(1.08); }
+  .btn-group > .btn + .dropdown-toggle { padding-left: 8px !important; padding-right: 8px !important; }
+  .btn .caret { border-top-color: currentColor !important; opacity: 0.7; }
+
+  input[type="text"], input[type="password"], input[type="email"], input[type="search"],
+  textarea, select, .uneditable-input {
+    background: var(--ff-input) !important;
+    color: var(--ff-text) !important;
+    border: 1px solid var(--ff-border) !important;
+    border-radius: 8px !important;
+    box-shadow: none !important;
+    transition: border-color 0.12s, box-shadow 0.12s;
+  }
+  input[type="text"]:focus, input[type="password"]:focus, input[type="email"]:focus, input[type="search"]:focus,
+  textarea:focus, select:focus {
+    border-color: var(--ff-accent) !important;
+    box-shadow: 0 0 0 3px var(--ff-ring) !important;
+    outline: 0 !important;
+  }
+  select option {
+    background: var(--ff-input);
+    color: var(--ff-text);
+  }
+  .input-prepend .add-on, .input-append .add-on {
+    background: var(--ff-surface-2) !important;
+    border-color: var(--ff-border) !important;
+    color: var(--ff-muted) !important;
+  }
+
+  .dropdown-menu {
+    background: var(--ff-surface) !important;
+    border: 1px solid var(--ff-border) !important;
+    border-radius: 10px !important;
+    box-shadow: 0 10px 28px rgba(0, 0, 0, 0.16) !important;
+    padding: 6px !important;
+  }
+  .dropdown-menu > li > a {
+    color: var(--ff-text) !important;
+    padding: 6px 14px !important;
+    border-radius: 6px;
+    line-height: 18px !important;
+  }
+  .dropdown-menu > li > a:hover, .dropdown-menu > li > a:focus,
+  .dropdown-menu > .active > a, .dropdown-submenu:hover > a {
+    background: var(--ff-glass), var(--ff-accent-grad) !important;
+    color: #fff !important;
+    text-shadow: 0 1px 0 rgba(0, 0, 0, 0.2);
+  }
+  .dropdown-menu .divider {
+    background: var(--ff-border) !important;
+    border-bottom-color: transparent !important;
+  }
+  .dropdown-menu .nav-header {
+    color: var(--ff-muted) !important;
+  }
+
+  .modal {
+    background: var(--ff-surface) !important;
+    color: var(--ff-text) !important;
+    border: 1px solid var(--ff-border) !important;
+    border-radius: 12px !important;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3) !important;
+  }
+  /* The site fades the backdrop's opacity but swaps its background from
+     transparent to 80% black the moment it opens, so the dim pops. A
+     constant colour lets the opacity fade do the work both ways. */
+  .modal-backdrop {
+    background: rgba(0, 0, 0, 0.55) !important;
+  }
+  .modal-backdrop.fade {
+    opacity: 0 !important;
+  }
+  .modal-backdrop.in, .modal-backdrop.fade.in {
+    opacity: 1 !important;
+  }
+  .modal-header {
+    border-bottom: 1px solid var(--ff-border) !important;
+  }
+  .modal-footer {
+    background: var(--ff-surface-2) !important;
+    border-top: 1px solid var(--ff-border) !important;
+    box-shadow: none !important;
+  }
+  .popover, .tooltip-inner {
+    background: var(--ff-surface) !important;
+    color: var(--ff-text) !important;
+    border-color: var(--ff-border) !important;
+  }
+  .well, .alert, .table-striped tbody > tr:nth-child(odd) > td {
+    background: var(--ff-surface-2) !important;
+    border-color: var(--ff-border) !important;
+    color: var(--ff-text) !important;
+  }
+  .table th, .table td, .table-bordered {
+    border-color: var(--ff-border) !important;
+  }
+  legend, h1, h2, h3, h4, h5, h6 {
+    color: var(--ff-text) !important;
+  }
+
+  /* ------------------------------------------------------------------ */
+  /* Search page: the controls become one toolbar above the results.    */
+  /* Markup: form[name=frm_search] > table > tr (Story dropdown, keyword */
+  /* field, Search, Options) + tr#advanced (hidden; Options toggles it:  */
+  /* tip, category, Match, Type, Sort) ; hr ; center "N found:" ;        */
+  /* div[float:right] Narrow Results (words listbox) ; div > .z-list…    */
+  /* ------------------------------------------------------------------ */
+
+  search = '#content_wrapper_inner:has(> form[name="frm_search"])'
+
+  {search} > form[name="frm_search"] {
+    display: block;
+    margin: 0 0 14px !important;
+    padding: 8px;
+    background: var(--ff-surface-2);
+    border: 1px solid var(--ff-border);
+    border-radius: 10px;
+  }
+  /* table, body and rows all become blocks; a block row left inside a
+     table body gets wrapped in an anonymous cell and shrinks to a sliver */
+  {search} form > table,
+  {search} form > table > tbody { display: block; width: 100%; border-collapse: collapse; }
+  {search} form > table > tbody > tr:not(#advanced),
+  {search} form > table > tbody > tr:not(#advanced) > td {
+    display: block;
+    width: auto !important; /* the cell carries a width hint */
+    padding: 0 !important;
+    border: 0 !important;
+  }
+
+  /* The toolbar row: [Story ▾][ keywords ][Search][Options] */
+  {search} .input-prepend.input-append {
+    display: flex !important;
+    align-items: stretch;
+    width: 100%;
+    margin: 0 !important;
+    font-size: 13px !important;
+  }
+  {search} .input-prepend .btn-group {
+    display: flex;
+    align-items: stretch;
+    gap: 6px;
+  }
+  {search} .input-prepend .btn-group:last-child { margin-left: 8px; }
+  {search} .input-prepend .btn {
+    height: 36px !important;
+    box-sizing: border-box;
+    display: inline-flex !important;
+    align-items: center;
+    gap: 7px;
+    padding: 0 14px !important;
+    border-radius: 8px !important;
+    font-weight: 500;
+    white-space: nowrap;
+  }
+  {search} .input-prepend .btn-group:first-child > .btn.dropdown-toggle {
+    border-radius: 8px 0 0 8px !important;
+    border-right: 0 !important;
+  }
+  {search} #keyword {
+    flex: 1 1 auto;
+    height: 36px !important;
+    box-sizing: border-box !important;
+    width: auto !important;
+    margin: 0 !important;
+    padding: 0 12px !important;
+    border-radius: 0 8px 8px 0 !important;
+    font-size: 14px !important;
+    line-height: 34px !important;
+  }
+  /* Search is the primary action: accent gloss */
+  {search} .input-prepend button[type="submit"]:not(.dropdown-toggle) {
+    background: var(--ff-glass), var(--ff-accent-grad) !important;
+    border-color: transparent !important;
+    color: #fff !important;
+    font-weight: 600;
+    text-shadow: 0 1px 0 rgba(0, 0, 0, 0.2);
+    box-shadow: var(--ff-edge-hi) !important;
+  }
+  {search} .input-prepend button[type="submit"]:not(.dropdown-toggle):hover {
+    filter: brightness(1.06);
+  }
+
+  /* Options panel: opens under the toolbar row */
+  {search} tr#advanced { display: block; }
+  {search} tr#advanced > td {
+    display: block;
+    padding: 10px 0 2px !important;
+    border: 0 !important;
+  }
+  {search} tr#advanced .table-bordered {
+    border: 0 !important;
+    border-top: 1px solid var(--ff-border) !important;
+    border-radius: 0 !important;
+    padding-top: 6px;
+  }
+  {search} tr#advanced table.table { width: 100%; margin: 0; }
+  {search} tr#advanced table.table td {
+    border: 0 !important;
+    padding: 6px 8px !important;
+    vertical-align: middle;
+    font-size: 13px;
+    background: transparent !important;
+  }
+  {search} tr#advanced table.table td:first-child {
+    width: 1%;
+    padding-right: 18px !important;
+    white-space: nowrap;
+    color: var(--ff-muted);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+  }
+  {search} tr#advanced table.table tr:first-child td {
+    color: var(--ff-muted);
+    font-size: 12px;
+    font-weight: 400;
+    letter-spacing: 0;
+    text-transform: none;
+  }
+  {search} tr#advanced select {
+    min-width: 200px;
+    height: 32px !important;
+    padding: 4px 8px !important;
+    background-color: var(--ff-input) !important;
+  }
+
+  /* Status line, side card, results */
+  {search} > hr { display: none; }
+  {search} > center {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    text-align: left !important;
+    margin: 0 0 10px !important;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--ff-muted);
+  }
+  {search} > center::before {
+    content: '◆';
+    color: var(--ff-accent);
+    font-size: 10px;
+  }
+  /* Narrow Results (the words listbox) joins the Options panel: hidden
+     with it, and when the panel is open it is placed over the panel's
+     right-hand side. It is a later sibling of the form in the markup, so
+     this is positioning, not moving. jQuery's toggle leaves "display:
+     none" in the row's style attribute when closed. */
+  {search} { position: relative; }
+  {search} > div[style*="float:right"] {
+    display: none;
+    float: none !important;
+    position: absolute;
+    top: 170px;                 /* the panel's vertical midline (panel top 73 + 194/2) */
+    transform: translateY(-50%);
+    right: 38px;
+    width: 200px !important;
+    margin: 0 !important;
+    padding: 10px 12px !important;
+    border: 1px solid var(--ff-border) !important;
+    border-radius: 10px;
+    background: var(--ff-surface);
+  }
+  {search}:has(tr#advanced:not([style*="none"])) > div[style*="float:right"] {
+    display: block;
+  }
+  {search}:has(tr#advanced:not([style*="none"])) tr#advanced .table-bordered {
+    padding-right: 240px;
+    min-height: 150px;
+  }
+  {search} > div[style*="float:right"] > div {
+    margin: 0 0 8px !important;
+    text-align: left !important;
+  }
+  {search} > div[style*="float:right"] small {
+    font-size: 11px !important;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--ff-muted);
+  }
+  {search} > div[style*="float:right"] select {
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 4px !important;
+    font-size: 12px !important;
+  }
+  {search} > div[style*="float:right"] > br { display: none; }
+  {search} > div:has(> .z-list) {
+    border-top: 0 !important;
+    margin: 0 !important;
+  }
+  {search} #fs_inside { border: 0 !important; padding: 0 !important; margin: 0 !important; }
+
+  /* ------------------------------------------------------------------ */
+  /* Browse pages (category lists such as /crossovers/game/): the         */
+  /* leaderboard. Markup: img + heading text ; hr ; center ("Sort by"    */
+  /* a, "Filter by name:" a(All) . span#list_menu > a(#) . a(A) ... ) ;  */
+  /* hr ; div#list_output > table > tr > td x3 > div > a + span.gray.    */
+  /* The site re-renders #list_output through its own script on sort or */
+  /* letter; the markup shape stays the same.                            */
+  /* ------------------------------------------------------------------ */
+
+  browse = '#content_wrapper_inner:has(> #list_output)'
+
+  {browse} > hr { display: none; }
+
+  /* toolbar: the sort link and the letter rail, sticky under the menu */
+  {browse} > center {
+    position: sticky;
+    top: 48px;
+    z-index: 40;
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 6px 10px;
+    margin: 10px 0 14px !important;
+    padding: 8px 10px;
+    background: var(--ff-surface-2);
+    border: 1px solid var(--ff-border);
+    border-radius: 10px;
+    text-align: left !important;
+    font-size: 0;            // hides the "Sort by", "Filter by name:" and " . " text nodes
+    line-height: 1;
+  }
+  {browse} > center > a {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    height: 32px;
+    padding: 0 12px;
+    border-radius: 8px;
+    border: 1px solid var(--ff-border);
+    background: var(--ff-surface);
+    color: var(--ff-text);
+    font-size: 13px;
+    font-weight: 500;
+    text-decoration: none !important;
+  }
+  {browse} > center > a:first-of-type::before {
+    content: '\21C5';
+    color: var(--ff-accent);
+    font-size: 12px;
+  }
+  {browse} > center > a:first-of-type { margin-right: 10px; }
+  {browse} > center > a:hover { border-color: var(--ff-accent); }
+  {browse} > center > #list_menu {
+    display: inline-flex;
+    flex-wrap: wrap;
+    gap: 3px;
+    font-size: 0;
+  }
+  {browse} > center > a:nth-of-type(2),
+  {browse} > center > #list_menu > a {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 26px;
+    height: 26px;
+    padding: 0 6px;
+    border-radius: 6px;
+    border: 1px solid transparent;
+    background: transparent;
+    color: var(--ff-text);
+    font-size: 12px;
+    font-weight: 600;
+    text-decoration: none !important;
+  }
+  {browse} > center > a:nth-of-type(2) { margin-right: 2px; }
+  {browse} > center > a:nth-of-type(2):hover,
+  {browse} > center > #list_menu > a:hover {
+    background: var(--ff-surface);
+    border-color: var(--ff-border);
+  }
+
+  /* plain category pages (/game/ etc.) carry the letters in a .lc-wrapper
+     instead of a center, with no sort link: same bar, same chips */
+  {browse} > table:first-of-type { margin-bottom: 4px; }
+  {browse} > .lc-wrapper {
+    position: sticky;
+    top: 48px;
+    z-index: 40;
+    margin: 10px 0 14px !important;
+    padding: 8px 10px;
+    background: var(--ff-surface-2);
+    border: 1px solid var(--ff-border);
+    border-radius: 10px;
+    text-align: left !important;
+  }
+  {browse} > .lc-wrapper::after { display: none; }
+  {browse} > .lc-wrapper > .lc {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 3px;
+    padding: 0 !important;
+    background: transparent !important;
+    font-size: 0;
+    line-height: 1;
+  }
+  {browse} > .lc-wrapper > .lc > #list_menu {
+    display: inline-flex;
+    flex-wrap: wrap;
+    gap: 3px;
+    font-size: 0;
+  }
+  {browse} > .lc-wrapper > .lc > a,
+  {browse} > .lc-wrapper > .lc > #list_menu > a {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 26px;
+    height: 26px;
+    padding: 0 6px;
+    border-radius: 6px;
+    border: 1px solid transparent;
+    color: var(--ff-text) !important;
+    font-size: 12px;
+    font-weight: 600;
+    text-decoration: none !important;
+  }
+  {browse} > .lc-wrapper > .lc > a:hover,
+  {browse} > .lc-wrapper > .lc > #list_menu > a:hover {
+    background: var(--ff-surface);
+    border-color: var(--ff-border);
+  }
+
+  /* the board: two columns of ranked rows */
+  {browse} > #list_output {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px 18px;
+    counter-reset: rank;
+  }
+  {browse} > #list_output table,
+  {browse} > #list_output tbody,
+  {browse} > #list_output tr,
+  {browse} > #list_output td {
+    display: contents !important;
+  }
+  {browse} > #list_output td > div {
+    counter-increment: rank;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    height: 40px;
+    padding: 0 10px 0 8px;
+    border-radius: 9px;
+    border: 1px solid var(--ff-border);
+    background: var(--ff-surface-2);
+    line-height: 1 !important;
+  }
+  {browse} > #list_output td > div::before {
+    content: counter(rank, decimal-leading-zero);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 26px;
+    border-radius: 6px;
+    border: 1px solid var(--ff-border);
+    background: var(--ff-surface);
+    color: var(--ff-muted);
+    font: 700 11px/1 Consolas, 'Cascadia Mono', 'Courier New', monospace;
+    letter-spacing: 0.5px;
+    flex: none;
+  }
+  /* top three: accent gloss on the badge (first column holds ranks 1-3) */
+  {browse} > #list_output td:first-child > div:nth-child(-n+3)::before {
+    background: var(--ff-glass), var(--ff-accent-grad);
+    border-color: transparent;
+    color: #fff;
+    text-shadow: 0 1px 0 rgba(0, 0, 0, 0.2);
+  }
+  {browse} > #list_output td > div > a {
+    flex: 1 1 auto;
+    min-width: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    color: var(--ff-text) !important;
+    font-size: 13.5px;
+    font-weight: 600;
+    text-decoration: none !important;
+  }
+  {browse} > #list_output td > div > span.gray {
+    flex: none;
+    padding: 2px 7px;
+    border-radius: 5px;
+    border: 1px solid var(--ff-border);
+    background: var(--ff-surface);
+    color: var(--ff-muted) !important;
+    font: 400 11px/1.4 Consolas, 'Cascadia Mono', 'Courier New', monospace;
+    white-space: nowrap;
+  }
+  {browse} > #list_output td > div:hover {
+    border-color: var(--ff-accent);
+    box-shadow: inset 3px 0 0 var(--ff-accent);
+  }
+  {browse} > #list_output td > div:hover > a { color: var(--ff-link) !important; }
+
+  @media (max-width: 760px) {
+    {browse} > #list_output { grid-template-columns: 1fr; }
+    {browse} > center, {browse} > .lc-wrapper { position: static; }
+  }
+
+  /* ------------------------------------------------------------------ */
+  /* Community pages (/community/Name/id/). Markup: breadcrumb links with */
+  /* .icon-chevron-right spans ; div.table-bordered (div.tcat title,      */
+  /* table#gui_table1 with the community image, Follow, focus/founder     */
+  /* lines) ; div[text-align:center] > form[name=myform] (six selects +   */
+  /* a Go input) ; hr ; a floated ad wrapper ; div.z-list rows ; center   */
+  /* pager. The category pages' Filters modal also holds a form named    */
+  /* myform, so the scope excludes modals.                                */
+  /* ------------------------------------------------------------------ */
+
+  community = '#content_wrapper_inner:has(> div:not(.modal) > form[name="myform"])'
+
+  {community} > hr { display: none; }
+  {community} > span.xicon-section-arrow {
+    margin: 0 6px;
+    color: var(--ff-muted) !important;
+  }
+
+  /* header card with a glossy title bar */
+  {community} > div.table-bordered {
+    margin: 10px 0 14px;
+    border: 1px solid var(--ff-border) !important;
+    border-radius: 12px !important;
+    overflow: hidden;
+    background: var(--ff-surface-2);
+  }
+  {community} > div.table-bordered > .tcat {
+    padding: 12px 16px !important;
+    background: var(--ff-glass), var(--ff-top-grad) !important;
+    box-shadow: var(--ff-edge-hi);
+    border: 0 !important;
+    color: #fff !important;
+    font-size: 16px;
+    font-weight: 700;
+    text-shadow: 0 1px 0 rgba(0, 0, 0, 0.35);
+  }
+  /* The card's cell holds, in order: the image ; a small transmit icon ;
+     the Follow link ; a "." text node ; the feed link (floated right) ;
+     hr ; div (Focus … Since) ; div (Founder - Stories - Followers - id) ;
+     an ad div and #staff (both hidden) ; div (description). It becomes a
+     grid: image down the left, Follow and feed on the first row, the two
+     stat lines under them, the description across the bottom. */
+  ccell = community + ' > div.table-bordered table.table td'   // concatenation: {x} is not interpolated inside a string
+  {ccell} {
+    display: grid;
+    grid-template-columns: 84px 1fr auto;
+    grid-template-areas: "img act feed" "img focus focus" "img founder founder" "desc desc desc";
+    column-gap: 16px;
+    row-gap: 8px;
+    align-items: start;
+    padding: 16px !important;
+    border: 0 !important;
+    line-height: 1.5;
+    font-size: 0;
+  }
+  {ccell} > * { font-size: 13px; }
+  {ccell} > img.cimage {
+    grid-area: img;
+    float: none !important;
+    width: 84px !important;
+    height: auto !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 1px solid var(--ff-border) !important;
+    border-radius: 8px !important;
+  }
+  {ccell} > img:not(.cimage) { display: none; }
+  {ccell} > hr { display: none; }
+  {ccell} > a:not([style*="float"]) {
+    grid-area: act;
+    justify-self: start;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    height: 30px;
+    padding: 0 12px;
+    border-radius: 8px;
+    border: 1px solid var(--ff-border);
+    background: var(--ff-surface);
+    color: var(--ff-text) !important;
+    font-weight: 600;
+    text-decoration: none !important;
+  }
+  {ccell} > a:not([style*="float"])::before {
+    content: '+';
+    color: var(--ff-accent);
+    font-weight: 700;
+  }
+  {ccell} > a:not([style*="float"]):hover { border-color: var(--ff-accent); }
+  {ccell} > a[style*="float"] {
+    grid-area: feed;
+    justify-self: end;
+    float: none !important;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
+    border-radius: 8px;
+    border: 1px solid var(--ff-border) !important;
+    background: var(--ff-surface);
+  }
+  {ccell} > a[style*="float"] > img { width: 14px; height: 14px; }
+  {ccell} > a[style*="float"]:hover { border-color: var(--ff-accent) !important; }
+  /* the two stat lines */
+  {ccell} > div:nth-of-type(1),
+  {ccell} > div:nth-of-type(2) {
+    padding: 7px 10px;
+    border-radius: 8px;
+    border: 1px solid var(--ff-border);
+    background: var(--ff-surface);
+    color: var(--ff-muted);
+  }
+  {ccell} > div:nth-of-type(1) { grid-area: focus; }
+  {ccell} > div:nth-of-type(2) { grid-area: founder; }
+  {ccell} > div:nth-of-type(1) .xicon-section-arrow {
+    margin: 0 4px;
+    font-size: 9px !important;
+  }
+  /* the description, its own area across the bottom */
+  {ccell} > div:last-of-type {
+    grid-area: desc;
+    margin-top: 4px;
+    padding: 12px 14px;
+    border-radius: 10px;
+    border: 1px solid var(--ff-border);
+    background: var(--ff-surface);
+    color: var(--ff-text);
+    font-size: 14px;
+    line-height: 1.6;
+  }
+  {ccell} > div:last-of-type::before {
+    content: 'Description';
+    display: block;
+    margin-bottom: 6px;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--ff-muted);
+  }
+  @media (max-width: 700px) {
+    {ccell} {
+      grid-template-columns: 1fr auto;
+      grid-template-areas: "img feed" "act act" "focus focus" "founder founder" "desc desc";
+    }
+  }
+
+  /* filters as a toolbar */
+  {community} > div:not(.modal):has(> form[name="myform"]) { text-align: left !important; }
+  {community} > div:not(.modal) > form[name="myform"] {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 0 0 14px !important;
+    padding: 8px;
+    background: var(--ff-surface-2);
+    border: 1px solid var(--ff-border);
+    border-radius: 10px;
+  }
+  {community} form[name="myform"] select {
+    flex: 1 1 150px;
+    height: 34px !important;
+    margin: 0 !important;
+    padding: 0 10px !important;
+    font-size: 13px !important;
+    width: auto !important;
+  }
+  {community} form[name="myform"] input {
+    height: 34px !important;
+    margin: 0 !important;
+    padding: 0 16px !important;
+    border-radius: 8px !important;
+    border: 1px solid transparent !important;
+    background: var(--ff-glass), var(--ff-accent-grad) !important;
+    color: #fff !important;
+    font-size: 13px !important;
+    font-weight: 600;
+    text-shadow: 0 1px 0 rgba(0, 0, 0, 0.2);
+    box-shadow: var(--ff-edge-hi) !important;
+    cursor: pointer;
+  }
+
+  /* pager as chips; the bold number is the current page */
+  {community} > center {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 6px;
+    margin: 16px 0 6px !important;
+  }
+  {community} > center > a,
+  {community} > center > b {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 30px;
+    height: 30px;
+    padding: 0 10px;
+    border-radius: 8px;
+    border: 1px solid var(--ff-border);
+    background: var(--ff-surface);
+    color: var(--ff-text) !important;
+    font-size: 13px;
+    font-weight: 600;
+    text-decoration: none !important;
+  }
+  {community} > center > b {
+    background: var(--ff-glass), var(--ff-accent-grad);
+    border-color: transparent;
+    color: #fff !important;
+    text-shadow: 0 1px 0 rgba(0, 0, 0, 0.2);
+  }
+  {community} > center > a:hover { border-color: var(--ff-accent); }
+
+  /* ------------------------------------------------------------------ */
+  /* Forums (/forum/Name/id/): a light pass. Header block (image, name,  */
+  /* description, New / Follow buttons), a pager in a .lc-wrapper, then  */
+  /* a bordered div with a tcat breadcrumb and a striped topics table    */
+  /* (thead ; a filter row of badges ; topic rows with pin, count badge,  */
+  /* title, author ; avatar, last poster, time).                         */
+  /* ------------------------------------------------------------------ */
+
+  forum = '#content_wrapper_inner:has(> .table-bordered > table.table-striped > thead)'
+
+  {forum} > div:first-of-type img.cimage {
+    border-radius: 8px !important;
+    border: 1px solid var(--ff-border) !important;
+    padding: 0 !important;
+    margin-right: 14px !important;
+  }
+  {forum} > div:first-of-type > strong {
+    font-size: 18px;
+    line-height: 1.3;
+  }
+  {forum} .lc center { font-size: 0; }
+  {forum} .lc center > a,
+  {forum} .lc center > b {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 28px;
+    height: 28px;
+    margin: 0 2px;
+    padding: 0 9px;
+    border-radius: 7px;
+    border: 1px solid var(--ff-border);
+    background: var(--ff-surface);
+    color: var(--ff-text) !important;
+    font-size: 12px;
+    font-weight: 600;
+    text-decoration: none !important;
+  }
+  {forum} .lc center > b {
+    background: var(--ff-glass), var(--ff-accent-grad);
+    border-color: transparent;
+    color: #fff !important;
+  }
+  {forum} > div.table-bordered {
+    margin: 12px 0;
+    border: 1px solid var(--ff-border) !important;
+    border-radius: 12px !important;
+    overflow: hidden;
+    background: var(--ff-surface);
+  }
+  {forum} > div.table-bordered > .tcat {
+    padding: 10px 14px !important;
+    background: var(--ff-surface-2) !important;
+    border: 0 !important;
+    border-bottom: 1px solid var(--ff-border) !important;
+    font-size: 13px;
+  }
+  {forum} table.table { margin: 0 !important; }
+  {forum} table.table th.thead {
+    padding: 8px 14px !important;
+    border: 0 !important;
+    border-bottom: 1px solid var(--ff-border) !important;
+    background: var(--ff-surface-2) !important;
+    color: var(--ff-muted) !important;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+  }
+  {forum} table.table td {
+    padding: 10px 14px !important;
+    border: 0 !important;
+    border-top: 1px solid var(--ff-border) !important;
+    vertical-align: middle !important;
+    line-height: 1.5;
+  }
+  {forum} .badge {
+    padding: 3px 8px !important;
+    border-radius: 6px !important;
+    border: 1px solid var(--ff-border);
+    background: var(--ff-surface-2) !important;
+    color: var(--ff-text) !important;
+    font-size: 11px !important;
+    font-weight: 600;
+    text-shadow: none !important;
+  }
+  {forum} .badge-active {
+    background: var(--ff-glass), var(--ff-accent-grad) !important;
+    border-color: transparent;
+    color: #fff !important;
+    text-shadow: 0 1px 0 rgba(0, 0, 0, 0.2) !important;
+  }
+  {forum} .badge-blue {
+    background: var(--ff-surface) !important;
+    color: var(--ff-muted) !important;
+    font-family: Consolas, 'Cascadia Mono', 'Courier New', monospace;
+  }
+  {forum} .icon-pin-1 { color: var(--ff-accent); }
+  {forum} img.round36 {
+    border-radius: 8px !important;
+    border: 1px solid var(--ff-border);
+  }
+
+  /* ------------------------------------------------------------------ */
+  /* Account area (/account/, /story/, /docs/, /pm2/ …): a two-column    */
+  /* table. Row 1: div.panel_normal notice. Row 2: td > ul.topnav (the   */
+  /* accordion: li > a.underline "Section<span>+</span>" + nested ul of  */
+  /* li > a.underline "- Item", li.active on the current one) and td     */
+  /* with bordered cards (div.tcat title + table.table-striped). Cards   */
+  /* come in three shapes: the story editing header (one row of tab      */
+  /* links), label / value tables (label cells carry width="1%", no      */
+  /* thead: Info, Account Settings, the properties form) and data tables */
+  /* with a thead (Document Manager, Story Chapters, Alert Settings).    */
+  /* ------------------------------------------------------------------ */
+
+  account = '#content_wrapper_inner:has(> table > tbody > tr > td > ul.topnav)'
+  /* the story editing header: one row of tab links ending in a right-aligned Delete link */
+  tabs = account + ' div.table-bordered:has(> table > tbody > tr:only-child > td[align="right"] > a:only-child)'
+
+  /* layout: the table becomes blocks; the sidebar row becomes a flex row */
+  {account} > table,
+  {account} > table > tbody,
+  {account} > table > tbody > tr,
+  {account} > table > tbody > tr > td {
+    display: block;
+    width: auto !important;
+    padding: 0 !important;
+    border: 0 !important;
+  }
+  {account} > table > tbody > tr:has(> td > ul.topnav) {
+    display: flex;
+    gap: 18px;             /* cells stretch, so the sticky sidebar has room to travel */
+  }
+  {account} > table > tbody > tr > td:has(> ul.topnav) { flex: 0 0 220px; }
+  {account} > table > tbody > tr > td:has(> ul.topnav) + td { flex: 1 1 auto; min-width: 0; }
+
+  /* the notice row */
+  {account} .panel_normal {
+    margin: 0 0 14px !important;
+    padding: 8px 12px !important;
+    border: 1px solid var(--ff-border) !important;
+    border-radius: 8px;
+    background: var(--ff-surface-2) !important;
+    color: var(--ff-muted) !important;
+    font-size: 12px;
+  }
+
+  /* sidebar: a console menu */
+  {account} ul.topnav {
+    position: sticky;
+    top: 60px;
+    width: auto !important;
+    margin: 0 !important;
+    padding: 6px !important;
+    border: 1px solid var(--ff-border) !important;
+    border-radius: 12px;
+    background: var(--ff-surface-2);
+  }
+  {account} ul.topnav li a.underline {
+    border: 0 !important;
+    text-decoration: none !important;
+  }
+  {account} ul.topnav > li > a.underline {
+    display: flex !important;
+    align-items: center;
+    justify-content: space-between;
+    padding: 9px 10px !important;
+    border-radius: 8px;
+    background: transparent !important;
+    color: var(--ff-muted) !important;
+    font-size: 11px !important;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+  }
+  {account} ul.topnav > li > a.underline:hover {
+    background: var(--ff-surface) !important;
+    color: var(--ff-text) !important;
+  }
+  {account} ul.topnav > li > a.underline > span {
+    float: none !important;
+    color: var(--ff-accent);
+    font: 700 13px/1 Consolas, 'Cascadia Mono', 'Courier New', monospace;
+    letter-spacing: 0;
+  }
+  {account} ul.topnav ul { padding: 2px 0 6px !important; }
+  /* Items. The site prefixes each label with "- " in the text itself, and
+     Chrome's ::first-letter would take the first letter with the dash, so
+     the dash is pulled into the anchor's left padding with a negative
+     text-indent and clipped off there. The row's background, cursor bar
+     and marker therefore live on the li, which is not clipped. */
+  {account} ul.topnav ul li {
+    position: relative;
+    border-radius: 7px;
+  }
+  {account} ul.topnav ul li::before {
+    content: '\25B8';
+    position: absolute;
+    left: 9px;
+    top: 50%;
+    transform: translate(-4px, -50%);
+    color: var(--ff-accent);
+    font-size: 11px;
+    line-height: 1;
+    opacity: 0;
+    pointer-events: none;
+  }
+  {account} ul.topnav ul li a.underline {
+    display: block !important;
+    padding: 7px 10px 7px 24px !important;
+    background: transparent !important;
+    color: var(--ff-text) !important;
+    font-size: 13px !important;
+    text-indent: -1.3ch;     /* "- " in Verdana 13px is 1.27ch wide */
+    clip-path: inset(0 0 0 22px);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  {account} ul.topnav ul li:hover {
+    background: var(--ff-surface);
+    box-shadow: inset 3px 0 0 var(--ff-accent);
+  }
+  {account} ul.topnav ul li:hover::before { opacity: 1; transform: translate(0, -50%); }
+  {account} ul.topnav ul li.active {
+    background: var(--ff-glass), var(--ff-accent-grad) !important;
+    box-shadow: var(--ff-edge-hi);
+  }
+  {account} ul.topnav ul li.active > a.underline {
+    color: #fff !important;
+    text-shadow: 0 1px 0 rgba(0, 0, 0, 0.2);
+  }
+  {account} ul.topnav ul li.active::before { color: #fff; opacity: 1; transform: translate(0, -50%); }
+
+  /* cards */
+  {account} div.table-bordered {
+    box-sizing: border-box;
+    margin: 0 0 12px !important;
+    border: 1px solid var(--ff-border) !important;
+    border-radius: 12px !important;
+    overflow: hidden;
+    background: var(--ff-surface);
+  }
+  {account} div.table-bordered > .tcat {
+    padding: 10px 14px !important;
+    border: 0 !important;
+    border-bottom: 1px solid var(--ff-border) !important;
+    background: var(--ff-surface-2) !important;
+    font-size: 13px;
+    font-weight: 700;
+  }
+  /* the editing header: glossy title bar, tab links as chips */
+  {tabs} > .tcat {
+    padding: 12px 16px !important;
+    background: var(--ff-glass), var(--ff-top-grad) !important;
+    box-shadow: var(--ff-edge-hi);
+    color: #fff !important;
+    font-size: 15px;
+    text-shadow: 0 1px 0 rgba(0, 0, 0, 0.35);
+  }
+  {tabs} > table.table,
+  {tabs} > table.table > tbody,
+  {tabs} > table.table > tbody > tr {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+    width: auto !important;
+    margin: 0 !important;
+  }
+  {tabs} > table.table > tbody > tr { padding: 8px 10px; }
+  {tabs} > table.table td {
+    display: block;
+    flex: none;
+    width: auto !important;  /* the cells carry width="1%", which would shrink them as flex items */
+    padding: 0 !important;
+    border: 0 !important;
+    background: transparent !important;
+    white-space: nowrap;
+    font-size: 0;
+    letter-spacing: 0;
+    text-transform: none;
+  }
+  {tabs} > table.table td[align="right"] { margin-left: auto; }
+  {tabs} > table.table td > a {
+    display: inline-flex;
+    align-items: center;
+    height: 32px;
+    padding: 0 12px;
+    border-radius: 8px;
+    border: 1px solid var(--ff-border);
+    background: var(--ff-surface);
+    color: var(--ff-text) !important;
+    font-size: 13px;
+    font-weight: 600;
+    text-decoration: none !important;
+  }
+  {tabs} > table.table td > a:hover { border-color: var(--ff-accent); }
+  {tabs} > table.table td[align="right"] > a { color: var(--ff-reviews) !important; }
+
+  /* label / value tables (Info) and the properties form */
+  {account} table.table td {
+    padding: 9px 14px !important;
+    border: 0 !important;
+    border-top: 1px solid var(--ff-border) !important;
+    vertical-align: middle !important;
+    line-height: 1.5;
+  }
+  {account} table.table tr:first-child td { border-top: 0 !important; }
+  {account} table.table th {
+    padding: 8px 14px !important;
+    border: 0 !important;
+    border-bottom: 1px solid var(--ff-border) !important;
+    background: var(--ff-surface-2) !important;
+    color: var(--ff-muted) !important;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    text-align: left;
+  }
+  {account} table.table:not(:has(> thead)) td[width="1%"] {
+    color: var(--ff-muted);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+  {account} form table.table:not(:has(> thead)) td[width="1%"] {
+    vertical-align: top !important;
+    padding-top: 12px !important;
+  }
+  {account} table.table td[width="1%"] > div.gray,
+  {account} table.table td[width="1%"] > span.xgray {
+    display: block;
+    margin-top: 2px;
+    color: var(--ff-muted) !important;
+    font-size: 10px !important;
+    font-weight: 400;
+    letter-spacing: 0.5px;
+    text-transform: none;
+  }
+  {account} form input[type="text"], {account} form textarea {
+    width: 100% !important;
+    max-width: 560px;
+    box-sizing: border-box;
+    padding: 6px 10px !important;
+  }
+  {account} form select { min-width: 180px; padding: 4px 8px !important; }
+  {account} form input[type="button"], {account} form input[type="submit"] {
+    height: 32px;
+    padding: 0 14px !important;
+    border-radius: 8px !important;
+    border: 1px solid var(--ff-border) !important;
+    background: var(--ff-surface) !important;
+    color: var(--ff-text) !important;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  {account} form input[type="submit"], {account} form button[type="submit"] {
+    background: var(--ff-glass), var(--ff-accent-grad) !important;
+    border-color: transparent !important;
+    color: #fff !important;
+    text-shadow: 0 1px 0 rgba(0, 0, 0, 0.2) !important;
+    box-shadow: var(--ff-edge-hi) !important;
+  }
+  {account} form input[type="button"]:hover { border-color: var(--ff-accent) !important; }
+  {account} form button[type="submit"]:hover { filter: brightness(1.08); }
+  {account} form img.cimage, {account} form img[src*="/image/"] {
+    border-radius: 8px !important;
+    border: 1px solid var(--ff-border) !important;
+    padding: 0 !important;
+  }
+
+  @media (max-width: 760px) {
+    {account} > table > tbody > tr:has(> td > ul.topnav) { flex-direction: column; }
+    {account} > table > tbody > tr > td:has(> ul.topnav) { flex: none; width: 100% !important; }
+    {account} ul.topnav { position: static; }
+  }
+
+  /* ------------------------------------------------------------------ */
+  /* Manage Stories (/story/story_tab_list.php): <b>Published Stories</b>, */
+  /* an hr, then #story-list, a List.js block: input.sort-search, the     */
+  /* bare text "Sort by:", span.sort-sort chips separated by bare " - "   */
+  /* text (the active one gets l-asc or l-desc), an hr, and div.sort-list */
+  /* holding div.z-list cards built like the listing cards (a.l-title in  */
+  /* place of a.stitle, the cover a direct child, a.reviews, .z-padtop    */
+  /* with span.l-summary and the .z-padtop2 meta strip).                  */
+  /* ------------------------------------------------------------------ */
+
+  manage = account + ' td:has(> #story-list)'
+
+  /* the cell also holds the bare text ": click on story to edit" */
+  {manage} { font-size: 0; }
+  {manage} > b {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0 0 10px;
+    color: var(--ff-muted);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+  }
+  {manage} > b::before {
+    content: '◆';
+    color: var(--ff-accent);
+    font-size: 10px;
+  }
+  {manage} > hr,
+  {manage} > #story-list > hr { display: none; }
+
+  /* the block is a panel: toolbar strip on top, the cards below. The
+     bare text nodes are hidden by zeroing the font size on the block. */
+  {manage} > #story-list {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    margin: 0;
+    padding: 8px 10px;
+    border: 1px solid var(--ff-border);
+    border-radius: 10px;
+    background: var(--ff-surface-2);
+    font-size: 0;
+  }
+  {manage} > #story-list > .sort-search {
+    order: 2;                /* after the sort chips, on the right; fills the row when it wraps */
+    flex: 1 1 160px;
+    max-width: 300px;
+    height: 32px !important;
+    box-sizing: border-box;
+    margin: 0 0 0 auto !important;
+    padding: 0 12px !important;
+    font-size: 13px !important;
+    line-height: 30px !important;
+  }
+  {manage} > #story-list::after {
+    content: 'Sort';
+    order: 0;
+    margin: 0 8px 0 2px;
+    color: var(--ff-muted);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+  }
+  {manage} > #story-list > .sort-sort {
+    order: 1;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    height: 26px;
+    margin: 2px 3px 2px 0;
+    padding: 0 9px;
+    border-radius: 6px;
+    border: 1px solid transparent;
+    color: var(--ff-text);
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    user-select: none;
+  }
+  {manage} > #story-list > .sort-sort:hover {
+    background: var(--ff-surface);
+    border-color: var(--ff-border);
+  }
+  {manage} > #story-list > .sort-sort.l-asc,
+  {manage} > #story-list > .sort-sort.l-desc {
+    background: var(--ff-glass), var(--ff-accent-grad);
+    border-color: transparent;
+    color: #fff;
+    text-shadow: 0 1px 0 rgba(0, 0, 0, 0.2);
+  }
+  {manage} > #story-list > .sort-sort.l-asc::after { content: '▲'; font-size: 8px; }
+  {manage} > #story-list > .sort-sort.l-desc::after { content: '▼'; font-size: 8px; }
+  {manage} > #story-list > .sort-list {
+    order: 3;
+    flex: 1 1 100%;
+    margin: 8px -11px -9px;     /* escapes the strip's padding and border */
+    padding: 12px 10px 10px;
+    border-top: 1px solid var(--ff-border);
+    border-radius: 0 0 10px 10px;
+    background: var(--ff-surface);
+    font-size: 14px;
+  }
+  {manage} .z-list > a.l-title { text-decoration: none; }
+  {manage} .z-list > a.l-title:hover { text-decoration: underline; }
+  {manage} .z-list > .z-padtop { margin-top: 6px; line-height: 1.5; }
+
+  /* ------------------------------------------------------------------ */
+  /* Fontastic Panel (UI and Reading font pickers): a console menu        */
+  /* ------------------------------------------------------------------ */
+
+  /* Width and margin stay the site's (560px / -280px): in its "dynamic"
+     mode the panel sits statically inside a .modal-wrapper that centres
+     it with that exact arithmetic. */
+  .modal[id^="_fontastic_"] {
+    border-radius: 14px !important;
+    padding: 0 !important;
+  }
+  /* Glossy navy title bar, like a 2000s sheet */
+  .modal[id^="_fontastic_"] .modal-header {
+    padding: 14px 20px !important;
+    background: var(--ff-glass), var(--ff-top-grad) !important;
+    box-shadow: var(--ff-edge-hi);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.3) !important;
+    border-radius: 14px 14px 0 0;
+    font-size: 12px !important;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.9) !important;
+    text-shadow: 0 1px 0 rgba(0, 0, 0, 0.35);
+  }
+  .modal[id^="_fontastic_"] .modal-header::before {
+    content: '◆';
+    margin-right: 10px;
+    color: var(--ff-accent-hi);
+    font-size: 10px;
+    vertical-align: 1px;
+    text-shadow: none;
+  }
+  .modal[id^="_fontastic_"] .modal-body {
+    padding: 18px 20px 20px !important;
+    max-height: none !important;
+    overflow: visible !important;
+    font-size: 12px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--ff-muted);
+  }
+  .modal[id^="_fontastic_"] .modal-body > br { display: none; }
+  .modal[id^="_fontastic_"] .modal-body > hr {
+    margin: 6px 0 10px !important;
+    opacity: 0.6;
+  }
+
+  /* Selector row */
+  .modal[id^="_fontastic_"] .input-prepend {
+    display: flex !important;
+    gap: 10px;
+    width: 100%;
+    margin: 0 0 18px !important;
+    font-size: 14px !important;
+    letter-spacing: 0;
+    text-transform: none;
+  }
+  .modal[id^="_fontastic_"] .input-prepend .btn-group {
+    flex: 1 1 auto;
+    display: block;
+    position: relative;
+  }
+  .modal[id^="_fontastic_"] .input-prepend .btn-group > .btn {
+    display: flex !important;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    height: 42px;
+    box-sizing: border-box;
+    padding: 0 14px 0 16px !important;
+    background: var(--ff-surface-2) !important;
+    border: 1px solid var(--ff-border) !important;
+    border-radius: 10px !important;
+    font-size: 14px !important;
+    font-weight: 600;
+    color: var(--ff-text) !important;
+  }
+  .modal[id^="_fontastic_"] .input-prepend .btn-group > .btn:hover {
+    border-color: var(--ff-accent) !important;
+    box-shadow: 0 0 0 3px var(--ff-ring) !important;
+  }
+  /* open: the selector lights up with the accent gloss */
+  .modal[id^="_fontastic_"] .input-prepend .btn-group.open > .btn {
+    background: var(--ff-glass), var(--ff-accent-grad) !important;
+    border-color: transparent !important;
+    box-shadow: var(--ff-edge-hi), 0 0 0 3px var(--ff-ring) !important;
+    color: #fff !important;
+    text-shadow: 0 1px 0 rgba(0, 0, 0, 0.2);
+  }
+  .modal[id^="_fontastic_"] .input-prepend .btn-group > .btn .caret {
+    margin-left: 12px !important;
+    border-top-color: var(--ff-accent) !important;
+    opacity: 1;
+  }
+  .modal[id^="_fontastic_"] .input-prepend .btn-group.open > .btn .caret {
+    border-top-color: #fff !important;
+  }
+
+  /* The font list: scrollable, each entry in its own face */
+  .modal[id^="_fontastic_"] .dropdown-menu {
+    left: 0 !important;
+    right: 0 !important;
+    min-width: 0 !important;
+    max-height: 264px;
+    overflow-y: auto !important;
+    margin-top: 6px !important;
+    padding: 6px !important;
+    scroll-behavior: smooth;
+    scrollbar-width: thin;
+    scrollbar-color: var(--ff-border) transparent;
+  }
+  .modal[id^="_fontastic_"] .dropdown-menu > li > a {
+    position: relative;
+    padding: 9px 14px 9px 34px !important;
+    font-size: 15px;
+    border-radius: 8px;
+    color: var(--ff-text) !important;
+  }
+  .modal[id^="_fontastic_"] .dropdown-menu > li > a::before {
+    content: '▸';
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--ff-accent);
+    font-family: Verdana, sans-serif;
+    font-size: 12px;
+    opacity: 0;
+  }
+  .modal[id^="_fontastic_"] .dropdown-menu > li > a:hover,
+  .modal[id^="_fontastic_"] .dropdown-menu > li > a:focus {
+    background: var(--ff-surface-2) !important;
+    color: var(--ff-text) !important;
+    box-shadow: inset 3px 0 0 var(--ff-accent);
+    padding-left: 34px !important;
+  }
+  .modal[id^="_fontastic_"] .dropdown-menu > li > a:hover::before,
+  .modal[id^="_fontastic_"] .dropdown-menu > li > a:focus::before {
+    opacity: 1;
+  }
+
+  /* Preview card */
+  .modal[id^="_fontastic_"] [id$="_preview"] {
+    position: relative;
+    overflow: hidden;
+    padding: 18px 20px !important;
+    background: var(--ff-surface-2);
+    border: 1px solid var(--ff-border);
+    border-radius: 10px;
+    font-size: 15px;
+    line-height: 1.6;
+    letter-spacing: 0;
+    text-transform: none;
+    color: var(--ff-text);
+  }
+  /* A cover the colour of the card, parked at zero width; the motion
+     block slides it off left to right when the font changes. */
+  .modal[id^="_fontastic_"] [id$="_preview"]::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: var(--ff-surface-2);
+    transform-origin: right center;
+    transform: scaleX(0);
+    pointer-events: none;
+  }
+
+  /* Footer */
+  .modal[id^="_fontastic_"] .modal-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 20px !important;
+    border-radius: 0 0 14px 14px;
+  }
+  .modal[id^="_fontastic_"] .modal-footer .btn {
+    float: none !important;
+    margin: 0 !important;
+    min-width: 92px;
+    text-align: center;
+  }
+
+  /* Review box */
+  #review textarea {
+    min-height: 90px;
+    line-height: 1.5 !important;
+  }
+
+  /* ------------------------------------------------------------------ */
+  /* Footer and cookie bar                                               */
+  /* ------------------------------------------------------------------ */
+
+  /* Footer: one 40px row at the end of the page. The body becomes a flex
+     column at least one viewport tall and the footer takes margin-top:
+     auto, so on a short page (the home page) it sits on the bottom edge of
+     the window and on a long page it simply follows the last element.
+     The markup is five stacked divs (links, spacer, X icon, spacer,
+     "ray id"); the spacers and the ray id are dropped, the " . "
+     separators between the links are text nodes and vanish under
+     font-size: 0 on their row. */
+  body {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    box-sizing: border-box;
+  }
+  #p_footer {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 22px;
+    height: 40px;
+    width: auto !important;
+    max-width: none !important;
+    margin: auto 0 0 !important;
+    padding: 0 16px !important;
+    background: var(--ff-surface);
+    border-top: 1px solid var(--ff-border);
+    color: var(--ff-muted);
+    font-size: 12px;
+  }
+  #p_footer > div { text-align: left !important; }
+  #p_footer > div[style*="height"],
+  #p_footer > div[style*="font-size:8px"] { display: none !important; }
+  #p_footer > div:first-child {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    font-size: 0;
+  }
+  #p_footer a {
+    color: var(--ff-muted);
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0.2px;
+    text-decoration: none !important;
+    padding: 4px 2px;
+    border-bottom: 1px solid transparent;
+  }
+  #p_footer a:hover {
+    color: var(--ff-text);
+    border-bottom-color: var(--ff-accent);
+  }
+  #p_footer .icon-twitter-3 {
+    display: inline-block;
+    font-size: 14px !important;
+    color: var(--ff-muted) !important;
+    width: auto !important;
+    height: auto !important;
+    vertical-align: -1px;
+  }
+  #p_footer a:hover .icon-twitter-3 { color: var(--ff-text) !important; }
+
+  #cookie_notice, .hv_center {
+    background: var(--ff-glass), var(--ff-top-grad) !important;
+    color: #fff !important;
+    box-shadow: var(--ff-edge-hi), 0 -2px 12px rgba(0, 0, 0, 0.25);
+  }
+  #cookie_notice a { color: #fff !important; }
+
+  /* ------------------------------------------------------------------ */
+  /* "Discover more" units and ads                                       */
+  /* ------------------------------------------------------------------ */
+
+  /* The "Discover more" link units (header strip, the block before the
+     footer, and the anchored pill) are advertising dressed as navigation;
+     the real nav sits right under them. Always off. */
+  .zmenu:not(:has(> #zmenu)),
+  body > .google-auto-placed,
+  html > #google-anno-sa, #google-anno-sa,
+  .google-aiuf, .google-anno-sa-qtx, .google-anno-skip,
+  .goog-rentries, .goog-rtopics {
+    display: none !important;
+  }
+  if hideads {
+    ins.adsbygoogle, .google-auto-placed,
+    /* the right-floated ad wrapper on listing and community pages: it
+       stays in the flow with the ad hidden and narrows the first story
+       cards beside it (listings write float:right, communities float: right) */
+    #content_wrapper_inner > div[style*="float"]:has(> ins.adsbygoogle) {
+      display: none !important;
+    }
+  }
+
+  /* ------------------------------------------------------------------ */
+  /* Home page: the launcher. Two blades (Fanfiction | Crossovers), each  */
+  /* a column of tile buttons. The markup is two bordered divs holding a */
+  /* header and a 5+4 table of links; the tables are flattened with      */
+  /* display: contents so the links stack. Scoped by the home-only       */
+  /* table ids, so no other page is touched.                             */
+  /* ------------------------------------------------------------------ */
+
+  /* The home page is the only page whose bordered #gui_table1 holds the
+     category links. Community pages have a #gui_table1, forums have
+     both tables; neither must become the launcher. */
+  home = '#content_wrapper_inner:has(> .table-bordered > #gui_table1 a[href="/anime/"]):has(> .table-bordered > #gui_table2 a[href="/crossovers/anime/"])'
+
+  {home} {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0 28px;
+    align-items: start;
+  }
+  {home} > div:not(.table-bordered) { display: none; }
+  {home} > table { grid-column: 1 / -1; margin-top: 18px; }
+  {home} > div.table-bordered {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    border: 0 !important;
+    margin: 0 !important;
+    background: transparent !important;
+  }
+  {home} .tcat {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 0 0 4px;
+    padding: 0 2px 8px !important;
+    background: transparent !important;
+    border: 0 !important;
+    border-bottom: 1px solid var(--ff-border) !important;
+    font-size: 12px !important;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--ff-muted) !important;
+  }
+  {home} .tcat::before {
+    content: '◆';
+    color: var(--ff-accent);
+    font-size: 10px;
+  }
+  {home} .tcat img { display: none; }
+  {home} .tcat b, {home} .tcat span { cursor: default !important; }
+  {home} table.table, {home} table.table tbody, {home} table.table tr, {home} table.table td {
+    display: contents !important;
+  }
+
+  /* The tile: icon well (::before, a rounded 32px box) + name + arrow
+     (::after). The accent edge under the cursor is an inset shadow. */
+  {home} table.table td > a {
+    position: relative;
+    display: flex;
+    align-items: center;
+    height: 52px;
+    padding: 0 44px 0 58px;
+    border-radius: 10px;
+    background: var(--ff-surface-2);
+    border: 1px solid var(--ff-border);
+    color: var(--ff-text) !important;
+    font-size: 15px;
+    font-weight: 600;
+    text-decoration: none !important;
+    overflow: hidden;
+  }
+  {home} table.table td > a::before {
+    content: '';
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    width: 32px;
+    height: 32px;
+    transform: translateY(-50%);
+    border-radius: 8px;
+    background-color: var(--ff-ring);
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: 16px 16px;
+    image-rendering: pixelated;
+  }
+  {home} table.table td > a::after {
+    content: '▸';
+    position: absolute;
+    right: 16px;
+    top: 50%;
+    transform: translate(-4px, -50%);
+    color: var(--ff-accent);
+    font-size: 13px;
+    opacity: 0;
+  }
+  {home} table.table td > a:hover,
+  {home} table.table td > a:focus-visible {
+    border-color: var(--ff-accent);
+    box-shadow: inset 3px 0 0 var(--ff-accent);
+    outline: 0;
+  }
+  {home} table.table td > a:hover::after,
+  {home} table.table td > a:focus-visible::after { opacity: 1; transform: translate(0, -50%); }
+
+  /* Silk icons from the site's own folder (CC BY 2.5, Mark James), drawn
+     crisp inside the well. Written as literal url() values. */
+  icon(name) {
+    background-image: unquote('url("/static/ficons/' + name + '.png")');
+  }
+  {home} a[href$="/anime/"]::before {
+    icon('pencil')
+  }
+  {home} a[href$="/book/"]::before {
+    icon('book')
+  }
+  {home} a[href$="/cartoon/"]::before {
+    icon('emoticon_smile')
+  }
+  {home} a[href$="/comic/"]::before {
+    icon('newspaper')
+  }
+  {home} a[href$="/game/"]::before {
+    icon('controller')
+  }
+  {home} a[href$="/misc/"]::before {
+    icon('bricks')
+  }
+  {home} a[href$="/movie/"]::before {
+    icon('film')
+  }
+  {home} a[href$="/play/"]::before {
+    icon('group')
+  }
+  {home} a[href$="/tv/"]::before {
+    icon('television')
+  }
+
+  if tweets == 0 {
+    {home} > table { display: none !important; }
+  }
+
+  @media (max-width: 700px) {
+    {home} { grid-template-columns: 1fr; gap: 18px; }
+  }
+
+  /* ------------------------------------------------------------------ */
+  /* Motion: console-game feel outside the reader. Short, eased, never   */
+  /* on the story text. Switched off entirely for reduced-motion users.  */
+  /* ------------------------------------------------------------------ */
+
+  if motion {
+    @keyframes ff-pop {
+      from { opacity: 0; transform: translateY(-6px) scale(0.98); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+    @keyframes ff-pop-up {
+      from { opacity: 0; transform: translateY(6px) scale(0.98); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+    @keyframes ff-rise {
+      from { opacity: 0; transform: translateY(100%); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes ff-fade {
+      from { opacity: 0; transform: translateY(4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    ease = cubic-bezier(0.2, 0.8, 0.2, 1)
+
+    /* Launcher tiles: lift, edge appears, arrow slides in; press squashes */
+    {home} table.table td > a {
+      transition: transform 0.12s ease, box-shadow 0.18s ease, border-color 0.15s ease;
+    }
+    {home} table.table td > a::after { transition: opacity 0.12s ease, transform 0.12s ease; }
+    {home} table.table td > a:hover,
+    {home} table.table td > a:focus-visible {
+      transform: translateY(-2px);
+      box-shadow: inset 3px 0 0 var(--ff-accent), 0 6px 16px rgba(0, 0, 0, 0.12);
+    }
+    {home} table.table td > a:active {
+      transform: translateY(0) scale(0.97);
+      box-shadow: inset 3px 0 0 var(--ff-accent);
+      transition-duration: 0.06s;
+    }
+
+    /* Buttons and menu items: lift on hover, press on click */
+    .btn,
+    .zui .xmenu_item > a.dropdown-toggle,
+    #top #name_login a,
+    .lc span[onclick] {
+      transition: background-color 0.15s ease, border-color 0.15s ease,
+                  color 0.15s ease, transform 0.12s ease, box-shadow 0.18s ease,
+                  filter 0.15s ease;
+    }
+    .btn:hover,
+    .zui .xmenu_item > a.dropdown-toggle:hover,
+    #top #name_login a:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 3px 10px rgba(0, 0, 0, 0.12);
+    }
+    .btn:active,
+    .zui .xmenu_item > a.dropdown-toggle:active,
+    #top #name_login a:active,
+    .lc span[onclick]:active {
+      transform: translateY(0) scale(0.97);
+      box-shadow: none;
+      transition-duration: 0.06s;
+    }
+    .zui .xmenu_item.open > a.dropdown-toggle {
+      transform: translateY(0);
+      box-shadow: 0 0 0 3px var(--ff-ring);
+    }
+
+    /* The Story button is anchored to the search field: colour only, no
+       lift or press, so the group never splits. */
+    #search_form .btn-group > button.btn:hover,
+    #search_form .btn-group > button.btn:active,
+    #search_form .btn-group.open > button.btn {
+      transform: none !important;
+      box-shadow: none !important;
+    }
+
+    /* Logo: shadow fades in on hover */
+    #top .menulink > a:first-of-type {
+      transition: text-shadow 0.18s ease;
+    }
+
+    /* Tagline: the underline slides in; its gradient's hue turns on a slow
+       loop, so the colour you land on each hover is effectively random
+       (CSS has no randomness). hue-rotate leaves the white text alone. */
+    @keyframes ff-hue {
+      to { filter: hue-rotate(360deg); }
+    }
+    #top .menulink small::after {
+      transition: background-size 0.32s ease;
+      animation: ff-hue 7s linear infinite;
+    }
+
+    /* Fontastic Panel button: same lift and press as the other buttons */
+    #top .menulink > span.icon-tl-text {
+      transition: background-color 0.15s ease, transform 0.12s ease, box-shadow 0.18s ease;
+    }
+    #top .menulink > span.icon-tl-text:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 3px 10px rgba(0, 0, 0, 0.3);
+    }
+    #top .menulink > span.icon-tl-text:active {
+      transform: translateY(0) scale(0.95);
+      box-shadow: none;
+      transition-duration: 0.06s;
+    }
+
+    /* Carets turn when a menu opens */
+    .caret {
+      transition: transform 0.18s ease;
+    }
+    .open > .dropdown-toggle .caret,
+    .open > .btn .caret {
+      transform: rotate(180deg);
+    }
+
+    /* Menus pop in; items nudge on hover */
+    .open > .dropdown-menu {
+      animation: ff-pop 0.16s ease both;
+      transform-origin: top left;
+    }
+    .dropup.open > .dropdown-menu {
+      animation: ff-pop-up 0.16s ease both;
+      transform-origin: bottom left;
+    }
+    .dropdown-menu > li > a {
+      transition: background-color 0.1s ease, color 0.1s ease, padding-left 0.14s ease;
+    }
+    .dropdown-menu > li > a:hover {
+      padding-left: 18px !important;
+    }
+
+    /* Fields: ring fades in, search widens */
+    input[type="text"], input[type="password"], input[type="search"], textarea, select {
+      transition: border-color 0.15s ease, box-shadow 0.18s ease, width 0.2s ease !important;
+    }
+
+    /* Browse leaderboard rows lift; toolbar chips lift */
+    {browse} > #list_output td > div {
+      transition: transform 0.12s ease, border-color 0.15s ease, box-shadow 0.18s ease;
+    }
+    {browse} > #list_output td > div:hover {
+      transform: translateY(-1px);
+      box-shadow: inset 3px 0 0 var(--ff-accent), 0 6px 16px rgba(0, 0, 0, 0.1);
+    }
+    {browse} > center > a, {browse} > center > #list_menu > a {
+      transition: background-color 0.12s ease, border-color 0.12s ease, transform 0.12s ease;
+    }
+    {browse} > center > #list_menu > a:hover, {browse} > center > a:nth-of-type(2):hover {
+      transform: translateY(-1px);
+    }
+
+    /* Reader toolbar: buttons lift and press, the glyph grows and tints,
+       the Contrast glyph turns over; open sub-row chips pop */
+    tool = reader + ' > .lc-wrapper:has(.icon-tl-contrast) > .lc'
+    {tool} > span {
+      transition: transform 0.12s ease, box-shadow 0.18s ease,
+                  border-color 0.15s ease, background-color 0.15s ease;
+    }
+    {tool} > span:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 14px rgba(0, 0, 0, 0.12);
+    }
+    {tool} > span:active {
+      transform: translateY(0) scale(0.95);
+      box-shadow: none;
+      transition-duration: 0.06s;
+    }
+    {tool} > span > span {
+      transition: transform 0.16s ease, color 0.15s ease;
+    }
+    {tool} > span:hover > span,
+    {tool} > span.icon-tl-text:hover,
+    {tool} > span.icon-align-justify:hover,
+    {tool} > span.icon-tl-text-height:hover {
+      color: var(--ff-accent) !important;
+    }
+    {tool} > span:hover > span { transform: scale(1.18); }
+    {tool} > span.icon-tl-contrast { transition: transform 0.12s ease, box-shadow 0.18s ease, border-color 0.15s ease, background-color 0.15s ease, color 0.15s ease; }
+    {tool} > span.icon-tl-contrast:hover {
+      color: var(--ff-accent) !important;
+      transform: translateY(-2px) rotate(180deg);
+    }
+    /* the sub-row groups do not lift; their chips do */
+    {tool} > #f_width:hover, {tool} > #f_size:hover {
+      transform: none;
+      box-shadow: none;
+    }
+    {tool} > #f_width > span, {tool} > #f_size > span {
+      transition: transform 0.12s ease, background-color 0.12s ease, color 0.12s ease;
+    }
+    {tool} > #f_width > span:hover, {tool} > #f_size > span:hover {
+      transform: translateY(-1px) scale(1.05);
+    }
+    {tool} > #f_width > span:active, {tool} > #f_size > span:active {
+      transform: scale(0.95);
+      transition-duration: 0.06s;
+    }
+
+    /* Chapter selector: a joined control, so no lift; the pressed piece
+       fills with the accent gloss, the select brightens its border */
+    {reader} > span:has(> #chap_select) > .btn,
+    {reader} > div:has(> #chap_select) > .btn {
+      transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+    }
+    {reader} > span:has(> #chap_select) > .btn:hover,
+    {reader} > div:has(> #chap_select) > .btn:hover {
+      transform: none;
+      box-shadow: none;
+      background: var(--ff-glass), var(--ff-accent-grad) !important;
+      border-color: transparent !important;
+      color: #fff !important;
+      text-shadow: 0 1px 0 rgba(0, 0, 0, 0.2);
+    }
+    {reader} > span:has(> #chap_select) > .btn:active,
+    {reader} > div:has(> #chap_select) > .btn:active {
+      transform: none;
+      filter: brightness(0.94);
+    }
+    {reader} #chap_select {
+      transition: border-color 0.15s ease, box-shadow 0.18s ease, background-color 0.15s ease;
+    }
+    {reader} #chap_select:hover {
+      box-shadow: 0 0 0 3px var(--ff-ring) !important;
+      background-color: var(--ff-surface) !important;
+    }
+
+    /* Story cards lift; the book lies flat as if picked up */
+    .z-list {
+      transition: transform 0.14s ease, box-shadow 0.18s ease, border-color 0.15s ease;
+    }
+    .z-list:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+    }
+    .z-list > a:has(> .icon-chevron-right) {
+      transition: transform 0.12s ease, border-color 0.15s ease, box-shadow 0.18s ease;
+    }
+    .z-list > a:has(> .icon-chevron-right):hover {
+      transform: translateY(-1px);
+      box-shadow: 0 3px 10px rgba(0, 0, 0, 0.12);
+    }
+    a.stitle {
+      transition: color 0.12s ease;
+    }
+
+    /* Page card settles in; the cookie bar rises */
+    #content_wrapper, .xcontrast {
+      animation: ff-fade 0.22s ease both;
+    }
+    #cookie_notice, .hv_center {
+      animation: ff-rise 0.35s ease both;
+    }
+    /* Modals. The site's close code listens for a transitionend on the
+       panel, then attaches "remove the backdrop when its transition ends".
+       The panel is nested inside the backdrop, so the panel's own end
+       event keeps bubbling and removes the backdrop at once (the pop).
+       Three rules work around that without script:
+       1. the closing panel transition is visually done in ~150 ms but
+          lasts 600 ms, so no end event fires before the site's 500 ms
+          fallback timer, which closes cleanly;
+       2. the backdrop starts dimming as soon as the panel loses .in
+          (:has), settling at 0.02 rather than 0;
+       3. the final step 0.02 -> 0 after the fallback is a real transition,
+          so the backdrop's own end event fires and the site removes it. */
+    .modal-backdrop.fade {
+      transition: opacity 0.22s ease !important;
+    }
+    .modal-backdrop.fade.in:has(.modal.fade:not(.in)[style*="display: block"]) {
+      opacity: 0.02 !important;
+      transition: opacity 0.28s ease 0.12s !important;
+    }
+    .modal.fade {
+      transform: translateY(-8px) scale(0.98);
+      transition: opacity 0.6s cubic-bezier(0.1, 1, 0.2, 1),
+                  top 0.6s cubic-bezier(0.1, 1, 0.2, 1),
+                  transform 0.6s cubic-bezier(0.1, 1, 0.2, 1) !important;
+    }
+    .modal.fade.in {
+      transform: translateY(0) scale(1);
+      transition: opacity 0.2s ease, top 0.22s ease, transform 0.22s ease !important;
+    }
+
+    /* Fontastic preview reveal. The site sets the new font and closes the
+       list in one step, so the reveal is parked while the list is open and
+       restarts the moment it closes on a pick: the new text is covered,
+       then uncovered left to right in twelve steps over a quarter second,
+       which reads as words appearing. (CSS cannot wrap words, so the steps
+       are by width, not by word boundary.) */
+    @keyframes ff-reveal {
+      from { transform: scaleX(1); }
+      to { transform: scaleX(0); }
+    }
+    .modal[id^="_fontastic_"] [id$="_preview"]::before {
+      animation: ff-reveal 0.25s steps(12, end) both;
+    }
+    .modal[id^="_fontastic_"] .modal-body:has(.btn-group.open) [id$="_preview"]::before {
+      animation: none;
+    }
+    /* list entries slide in a touch as the list pops */
+    .modal[id^="_fontastic_"] .dropdown-menu > li > a {
+      transition: background-color 0.1s ease, box-shadow 0.12s ease;
+    }
+    .modal[id^="_fontastic_"] .dropdown-menu > li > a::before {
+      transition: opacity 0.12s ease, transform 0.12s ease;
+    }
+    .modal[id^="_fontastic_"] .dropdown-menu > li > a:hover::before {
+      transform: translate(2px, -50%);
+    }
+
+    /* Reduced motion: animations off, transitions near-instant rather than
+       none, because the site's modal code waits for a transitionend event
+       on the backdrop before it shows the panel; with no transition the
+       event never fires and the modal never opens. */
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation: none !important;
+        transition-duration: 0.01s !important;
+        transition-delay: 0s !important;
+      }
+    }
+  }
+
+  /* ------------------------------------------------------------------ */
+  /* Narrow screens                                                      */
+  /* ------------------------------------------------------------------ */
+
+  @media (max-width: 760px) {
+    #content_parent, .xcontrast_outer { padding: 8px 0 !important; }
+    #content_wrapper, .xcontrast { border-radius: 0; border-left: 0; border-right: 0; }
+    #content_wrapper_inner { padding: 12px 12px !important; }
+    #top .menulink { padding: 8px 10px !important; flex-wrap: wrap; }
+    #top .menulink small { display: none; }
+    #zmenu { padding: 4px !important; }
+    #zmenu table.maxwidth { flex-wrap: wrap; gap: 6px; }
+    #zmenu td { flex-wrap: wrap; justify-content: center; }
+    .zui .xmenu_item > a.dropdown-toggle { padding: 0 9px !important; }
+    #search_form #search_keywords { width: 140px !important; }
+    .z-list { margin: 0; }
+  }
+}
+
+/* ======================================================================
+   Browse heading icons, one URL-scoped section per category. The heading
+   on /game/ and /crossovers/game/ is an <img> (the generic script or
+   arrow-switch Silk icon) followed by the heading text; nothing in the
+   markup names the category, so the URL does. `content: url()` swaps the
+   image in place.
+   ====================================================================== */
+@-moz-document url-prefix("https://www.fanfiction.net/anime/"), url-prefix("https://www.fanfiction.net/crossovers/anime/") {
+  #content_wrapper_inner > img:first-of-type,
+  #content_wrapper_inner > table:first-of-type td > img {
+    content: unquote('url("/static/ficons/pencil.png")');
+    width: 16px;
+    height: 16px;
+    image-rendering: pixelated;
+    vertical-align: -3px;
+    margin-right: 6px;
+  }
+}
+@-moz-document url-prefix("https://www.fanfiction.net/book/"), url-prefix("https://www.fanfiction.net/crossovers/book/") {
+  #content_wrapper_inner > img:first-of-type,
+  #content_wrapper_inner > table:first-of-type td > img {
+    content: unquote('url("/static/ficons/book.png")');
+    width: 16px;
+    height: 16px;
+    image-rendering: pixelated;
+    vertical-align: -3px;
+    margin-right: 6px;
+  }
+}
+@-moz-document url-prefix("https://www.fanfiction.net/cartoon/"), url-prefix("https://www.fanfiction.net/crossovers/cartoon/") {
+  #content_wrapper_inner > img:first-of-type,
+  #content_wrapper_inner > table:first-of-type td > img {
+    content: unquote('url("/static/ficons/emoticon_smile.png")');
+    width: 16px;
+    height: 16px;
+    image-rendering: pixelated;
+    vertical-align: -3px;
+    margin-right: 6px;
+  }
+}
+@-moz-document url-prefix("https://www.fanfiction.net/comic/"), url-prefix("https://www.fanfiction.net/crossovers/comic/") {
+  #content_wrapper_inner > img:first-of-type,
+  #content_wrapper_inner > table:first-of-type td > img {
+    content: unquote('url("/static/ficons/newspaper.png")');
+    width: 16px;
+    height: 16px;
+    image-rendering: pixelated;
+    vertical-align: -3px;
+    margin-right: 6px;
+  }
+}
+@-moz-document url-prefix("https://www.fanfiction.net/game/"), url-prefix("https://www.fanfiction.net/crossovers/game/") {
+  #content_wrapper_inner > img:first-of-type,
+  #content_wrapper_inner > table:first-of-type td > img {
+    content: unquote('url("/static/ficons/controller.png")');
+    width: 16px;
+    height: 16px;
+    image-rendering: pixelated;
+    vertical-align: -3px;
+    margin-right: 6px;
+  }
+}
+@-moz-document url-prefix("https://www.fanfiction.net/misc/"), url-prefix("https://www.fanfiction.net/crossovers/misc/") {
+  #content_wrapper_inner > img:first-of-type,
+  #content_wrapper_inner > table:first-of-type td > img {
+    content: unquote('url("/static/ficons/bricks.png")');
+    width: 16px;
+    height: 16px;
+    image-rendering: pixelated;
+    vertical-align: -3px;
+    margin-right: 6px;
+  }
+}
+@-moz-document url-prefix("https://www.fanfiction.net/movie/"), url-prefix("https://www.fanfiction.net/crossovers/movie/") {
+  #content_wrapper_inner > img:first-of-type,
+  #content_wrapper_inner > table:first-of-type td > img {
+    content: unquote('url("/static/ficons/film.png")');
+    width: 16px;
+    height: 16px;
+    image-rendering: pixelated;
+    vertical-align: -3px;
+    margin-right: 6px;
+  }
+}
+@-moz-document url-prefix("https://www.fanfiction.net/play/"), url-prefix("https://www.fanfiction.net/crossovers/play/") {
+  #content_wrapper_inner > img:first-of-type,
+  #content_wrapper_inner > table:first-of-type td > img {
+    content: unquote('url("/static/ficons/group.png")');
+    width: 16px;
+    height: 16px;
+    image-rendering: pixelated;
+    vertical-align: -3px;
+    margin-right: 6px;
+  }
+}
+@-moz-document url-prefix("https://www.fanfiction.net/tv/"), url-prefix("https://www.fanfiction.net/crossovers/tv/") {
+  #content_wrapper_inner > img:first-of-type,
+  #content_wrapper_inner > table:first-of-type td > img {
+    content: unquote('url("/static/ficons/television.png")');
+    width: 16px;
+    height: 16px;
+    image-rendering: pixelated;
+    vertical-align: -3px;
+    margin-right: 6px;
+  }
+}

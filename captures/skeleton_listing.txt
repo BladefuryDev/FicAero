@@ -1,0 +1,78 @@
+Rendered DOM skeleton of https://www.fanfiction.net/Pok%C3%A9mon_and_Star-Trek-Online_Crossovers/80/9621/
+(signed-out, 1024px viewport, 2026-11-11; scripts/styles/iframes dropped, hidden elements dropped, repeated siblings collapsed as xN)
+
+body.yes-fontsmoothing
+  div#top
+    div.menulink.maxwidth
+      span#name_login.pull-right
+        a [/login.php?cache=bust]
+          span.icon-lock
+        a [/signup.php] "Sign Up"
+      a [/] "FanFiction"
+      small "|"
+      span.icon-kub-mobile
+      span.icon-tl-text
+  div.zmenu                                  <- first .zmenu holds an ad slot (ins.adsbygoogle)
+    ins.adsbygoogle
+      div#aswift_0_host (ad)
+  div.zmenu                                  <- the real menu
+    div#zmenu.maxwidth
+      span.zui
+        table.maxwidth
+          tbody
+            tr
+              td
+                div.dropdown.xmenu_item x5    (Browse, Just In, Community, Forum, Betas)
+                  a.dropdown-toggle [#]
+                    b.caret
+              td
+                form#search_form.pull-right
+                  div.input-prepend
+                    div.btn-group
+                      button.btn.dropdown-toggle
+                        span#search_head "Story"
+                        span.caret
+                    input#search_keywords.span2
+    div.google-auto-placed
+      ins.adsbygoogle.adsbygoogle-noablate (ad)
+  div#content_parent.xcontrast_outer
+    div#content_wrapper.xcontrast.maxwidth
+      div#content_wrapper_inner
+        img
+        a x2 [/crossovers/Pok%C3%A9mon/80/] "Pokémon"
+        a [/atom/l/?&cross=1&cid1=80&cid2=9621&r=103&s=1]
+          img
+        hr
+        center
+          span.btn "Filters"
+        div
+          ins.adsbygoogle (ad)
+        div.z-list.zhover.zpointer           <- one story row
+          a.stitle [/s/14490010/1/Pokemon-Mystery-Dungeon-Starfall-Legacy]
+            img.lazy.cimage
+          a [/s/14490010/16/...]
+            span.icon-chevron-right.xicon-section-arrow
+          a [/u/16665381/PRG-Central] "PRG-Central"
+          a.reviews [/r/14490010/] "reviews"
+          div.z-indent.z-padtop               <- summary text
+            div.z-padtop2.xgray               <- "Rated: T - English - ... - Updated: <span>Nov 8</span>"
+              span x2 "Nov 8"
+        div.z-list.zhover.zpointer
+          ...
+  div#p_footer.maxwidth
+    div
+      a x5 [/support/] "Help"
+    div
+    div
+      a [//x.com/fictionpress]
+        span.icon-twitter-3
+    div x2
+  div#cookie_notice.hv_center
+    div
+      table
+        tbody
+          tr
+            td
+              a x2 [/cookies/] "Cookies"
+            td
+              div "Accept"
